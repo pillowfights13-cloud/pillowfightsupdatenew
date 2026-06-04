@@ -1,0 +1,1443 @@
+{% comment %}
+  Pillow Fights — Wall Art Collection Section
+  File: sections/wall-art-collection.liquid
+  Fully dynamic via Shopify Theme Editor.
+  Mobile-first. Scoped CSS (pf-wa__ prefix). No header/footer.
+{% endcomment %}
+
+{%- liquid
+  assign section_id = 'pf-wa-' | append: section.id
+  assign cat_blocks = section.blocks | where: 'type', 'category'
+  assign room_blocks = section.blocks | where: 'type', 'room'
+  assign painting_blocks = section.blocks | where: 'type', 'painting'
+  assign bundle_blocks = section.blocks | where: 'type', 'bundle'
+  assign faq_blocks = section.blocks | where: 'type', 'faq'
+  assign spiritual_tags = section.blocks | where: 'type', 'spiritual_tag'
+-%}
+
+<style>
+  /* ── SCOPED TO THIS SECTION ONLY ── */
+  #{{ section_id }} {
+    --pf-cream: {{ section.settings.color_cream | default: '#F5F0E8' }};
+    --pf-cream-dark: {{ section.settings.color_cream_dark | default: '#EDE6D6' }};
+    --pf-bark: {{ section.settings.color_bark | default: '#2C2416' }};
+    --pf-bark-mid: #4A3E2C;
+    --pf-sage: {{ section.settings.color_sage | default: '#3D5040' }};
+    --pf-gold: {{ section.settings.color_gold | default: '#B8973A' }};
+    --pf-gold-light: #D4B05A;
+    --pf-warm-white: #FBF8F2;
+    --pf-text-primary: #1E1A14;
+    --pf-text-secondary: #5C5040;
+    --pf-text-muted: #9C8E7A;
+    --pf-border: rgba(44,36,22,0.12);
+    font-family: var(--font-body-family, 'DM Sans', sans-serif);
+    background: var(--pf-cream);
+    color: var(--pf-text-primary);
+  }
+
+  #{{ section_id }} *,
+  #{{ section_id }} *::before,
+  #{{ section_id }} *::after { box-sizing: border-box; }
+
+  /* ── ANNOUNCE BAR ── */
+  #{{ section_id }} .pf-wa__announce {
+    background: var(--pf-bark);
+    color: rgba(245,240,232,0.85);
+    text-align: center;
+    padding: 10px 16px;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    line-height: 1.5;
+  }
+  #{{ section_id }} .pf-wa__announce a {
+    color: var(--pf-gold-light);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  #{{ section_id }} .pf-wa__announce strong { color: #fff; }
+
+  /* ── HERO ── */
+  #{{ section_id }} .pf-wa__hero {
+    display: flex;
+    flex-direction: column;
+    min-height: 100svh;
+    position: relative;
+  }
+  #{{ section_id }} .pf-wa__hero-left {
+    background: var(--pf-bark);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 56px 24px 48px;
+    min-height: 65svh;
+    position: relative;
+    overflow: hidden;
+  }
+  #{{ section_id }} .pf-wa__hero-bg {
+    position: absolute;
+    inset: 0;
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    opacity: 0.32;
+  }
+  #{{ section_id }} .pf-wa__hero-content { position: relative; z-index: 1; }
+  #{{ section_id }} .pf-wa__eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--pf-gold-light);
+    font-weight: 500;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #{{ section_id }} .pf-wa__eyebrow::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--pf-gold);
+    flex-shrink: 0;
+  }
+  #{{ section_id }} .pf-wa__hero-title {
+    font-family: var(--font-heading-family, Georgia, serif);
+    font-size: clamp(36px, 10vw, 64px);
+    font-weight: 300;
+    color: var(--pf-warm-white);
+    line-height: 1.1;
+    margin-bottom: 18px;
+    letter-spacing: -0.01em;
+  }
+  #{{ section_id }} .pf-wa__hero-title em {
+    font-style: italic;
+    color: var(--pf-gold-light);
+  }
+  #{{ section_id }} .pf-wa__hero-sub {
+    font-size: 15px;
+    color: rgba(251,248,242,0.6);
+    line-height: 1.7;
+    margin-bottom: 32px;
+    font-weight: 300;
+    max-width: 420px;
+  }
+  #{{ section_id }} .pf-wa__hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+  #{{ section_id }} .pf-wa__hero-right {
+    display: grid;
+    grid-template-rows: 1fr auto;
+  }
+  #{{ section_id }} .pf-wa__hero-room {
+    position: relative;
+    overflow: hidden;
+    min-height: 260px;
+  }
+  #{{ section_id }} .pf-wa__hero-room img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.7s ease;
+  }
+  #{{ section_id }} .pf-wa__hero-room:hover img { transform: scale(1.04); }
+  #{{ section_id }} .pf-wa__room-label {
+    position: absolute;
+    bottom: 14px;
+    left: 14px;
+    background: rgba(30,26,20,0.78);
+    backdrop-filter: blur(4px);
+    color: var(--pf-cream);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    padding: 6px 12px;
+  }
+  #{{ section_id }} .pf-wa__hero-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--pf-bark);
+    border-top: 2px solid var(--pf-gold);
+  }
+  #{{ section_id }} .pf-wa__stat {
+    padding: 22px 24px;
+    border-right: 0.5px solid rgba(255,255,255,0.08);
+  }
+  #{{ section_id }} .pf-wa__stat:last-child { border-right: none; }
+  #{{ section_id }} .pf-wa__stat-num {
+    font-family: var(--font-heading-family, Georgia, serif);
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--pf-gold-light);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  #{{ section_id }} .pf-wa__stat-label { font-size: 11px; color: rgba(251,248,242,0.5); letter-spacing: 0.05em; }
+
+  /* ── DISCOUNT STRIP ── */
+  #{{ section_id }} .pf-wa__discount {
+    margin: 24px 16px;
+    background: var(--pf-cream-dark);
+    border: 1.5px solid var(--pf-gold);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  #{{ section_id }} .pf-wa__discount-badge {
+    display: inline-block;
+    background: var(--pf-gold);
+    color: var(--pf-bark);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 4px 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    align-self: flex-start;
+  }
+  #{{ section_id }} .pf-wa__discount-text { font-size: 14px; color: var(--pf-bark); line-height: 1.5; }
+  #{{ section_id }} .pf-wa__discount-code {
+    font-family: 'Courier New', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    background: var(--pf-bark);
+    color: var(--pf-cream);
+    padding: 8px 16px;
+    display: inline-block;
+    align-self: flex-start;
+  }
+
+  /* ── SECTION HEADER ── */
+  #{{ section_id }} .pf-wa__section-header {
+    padding: 0 16px;
+    margin-bottom: 36px;
+    text-align: center;
+  }
+  #{{ section_id }} .pf-wa__section-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--pf-gold);
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  #{{ section_id }} .pf-wa__section-title {
+    font-family: var(--font-heading-family, Georgia, serif);
+    font-size: clamp(26px, 7vw, 44px);
+    font-weight: 300;
+    color: var(--pf-bark);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+  }
+  #{{ section_id }} .pf-wa__section-title em { font-style: italic; color: var(--pf-sage); }
+  #{{ section_id }} .pf-wa__section-desc {
+    font-size: 14px;
+    color: var(--pf-text-secondary);
+    line-height: 1.7;
+    font-weight: 300;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  /* ── CATEGORIES ── */
+  #{{ section_id }} .pf-wa__categories { padding: 64px 16px; }
+  #{{ section_id }} .pf-wa__cat-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  #{{ section_id }} .pf-wa__cat-card {
+    position: relative;
+    overflow: hidden;
+    background: var(--pf-bark-mid);
+    text-decoration: none;
+    display: block;
+    min-height: 220px;
+  }
+  #{{ section_id }} .pf-wa__cat-card--large { min-height: 300px; }
+  #{{ section_id }} .pf-wa__cat-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    inset: 0;
+    display: block;
+    transition: transform 0.7s ease;
+  }
+  #{{ section_id }} .pf-wa__cat-card:hover img { transform: scale(1.06); }
+  #{{ section_id }} .pf-wa__cat-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(30,26,20,0.88) 0%, rgba(30,26,20,0.15) 55%, transparent 100%);
+    transition: background 0.4s;
+  }
+  #{{ section_id }} .pf-wa__cat-card:hover .pf-wa__cat-overlay {
+    background: linear-gradient(to top, rgba(30,26,20,0.92) 0%, rgba(30,26,20,0.35) 65%, rgba(30,26,20,0.1) 100%);
+  }
+  #{{ section_id }} .pf-wa__cat-info {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 20px 22px;
+    z-index: 1;
+  }
+  #{{ section_id }} .pf-wa__cat-tag {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--pf-gold-light);
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 5px;
+  }
+  #{{ section_id }} .pf-wa__cat-name {
+    font-family: var(--font-heading-family, Georgia, serif);
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--pf-warm-white);
+    line-height: 1.2;
+    margin-bottom: 5px;
+  }
+  #{{ section_id }} .pf-wa__cat-count { font-size: 12px; color: rgba(251,248,242,0.5); }
+  #{{ section_id }} .pf-wa__cat-arrow {
+    position: absolute;
+    top: 16px; right: 16px;
+    width: 34px; height: 34px;
+    border: 1px solid rgba(251,248,242,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--pf-cream);
+    font-size: 15px;
+    z-index: 1;
+    transition: transform 0.3s, border-color 0.3s, background 0.3s;
+  }
+  #{{ section_id }} .pf-wa__cat-card:hover .pf-wa__cat-arrow {
+    transform: rotate(45deg);
+    border-color: var(--pf-gold);
+    background: var(--pf-gold);
+    color: var(--pf-bark);
+  }
+
+  /* ── ROOM SECTION ── */
+  #{{ section_id }} .pf-wa__rooms {
+    background: var(--pf-bark);
+    padding: 64px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  #{{ section_id }} .pf-wa__rooms .pf-wa__section-title { color: var(--pf-warm-white); }
+  #{{ section_id }} .pf-wa__rooms .pf-wa__section-title em { color: var(--pf-gold-light); }
+  #{{ section_id }} .pf-wa__rooms .pf-wa__section-desc { color: rgba(251,248,242,0.5); }
+  #{{ section_id }} .pf-wa__rooms .pf-wa__section-eyebrow { color: var(--pf-gold); }
+  #{{ section_id }} .pf-wa__rooms-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  #{{ section_id }} .pf-wa__room-card {
+    background: rgba(255,255,255,0.04);
+    border: 0.5px solid rgba(255,255,255,0.08);
+    overflow: hidden;
+    text-decoration: none;
+    display: block;
+  }
+  #{{ section_id }} .pf-wa__room-card img {
+    width: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s ease;
+  }
+  #{{ section_id }} .pf-wa__room-card:hover img { transform: scale(1.04); }
+  #{{ section_id }} .pf-wa__room-body { padding: 18px 20px 22px; }
+  #{{ section_id }} .pf-wa__room-type {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--pf-gold);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  #{{ section_id }} .pf-wa__room-title {
+    font-family: var(--font-heading-family, Georgia, serif);
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--pf-warm-white);
+    margin-bottom: 7px;
+  }
+  #{{ section_id }} .pf-wa__room-desc { font-size: 13px; color: rgba(251,248,242,0.45); line-height: 1.65; margin-bottom: 14px; }
+  #{{ section_id }} .pf-wa__room-link {
+    font-size: 12px;
+    color: var(--pf-gold-light);
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: gap 0.2s;
+  }
+  #{{ section_id }} .pf-wa__room-link:hover { gap: 9px; }
+
+  /* ── FEATURED PAINTINGS ── */
+  #{{ section_id }} .pf-wa__featured {
+    background: var(--pf-warm-white);
+    padding: 64px 16px;
+  }
+  #{{ section_id }} .pf-wa__paintings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  #{{ section_id }} .pf-wa__painting-card {
+    background: var(--pf-cream);
+    text-decoration: none;
+    display: block;
+    transition: transform 0.3s;
+  }
+  #{{ section_id }} .pf-wa__painting-card:hover { transform: translateY(-3px); }
+  #{{ section_id }} .pf-wa__painting-img {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 3/4;
+    background: var(--pf-cream-dark);
+  }
+  #{{ section_id }} .pf-wa__painting-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s ease;
+  }
+  #{{ section_id }} .pf-wa__painting-card:hover .pf-wa__painting-img img { transform: scale(1.05); }
+  #{{ section_id }} .pf-wa__painting-badge {
+    position: absolute;
+    top: 10px; left: 10px;
+    background: var(--pf-sage);
+    color: var(--pf-cream);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+  #{{ section_id }} .pf-wa__painting-badge--gold { background: var(--pf-gold); color: var(--pf-bark); }
+  #{{ section_id }} .pf-wa__painting-body { padding: 12px 4px 16px; }
+  #{{ section_id }} .pf-wa__painting-cat {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--pf-text-muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  #{{ section_id }} .pf-wa__painting-name {
+    font-family: var(--font-heading-family, Georgia, serif);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--pf-bark);
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+  #{{ section_id }} .pf-wa__painting-price { font-size: 13px; font-weight: 500; color: var(--pf-bark); }
+  #{{ section_id }} .pf-wa__painting-price-from { font-size: 11px; color: var(--pf-text-muted); font-weight: 400; }
+  #{{ section_id }} .pf-wa__view-all { text-align: center; margin-top: 36px; }
+
+  /* ── SPIRITUAL ── */
+  #{{ section_id }} .pf-wa__spiritual {
+    background: var(--pf-sage);
+    padding: 64px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  #{{ section_id }} .pf-wa__spiritual::after {
+    content: 'ॐ';
+    position: absolute;
+    bottom: -30px; right: 10px;
+    font-size: 180px;
+    color: rgba(255,255,255,0.04);
+    font-family: serif;
+    line-height: 1;
+    pointer-events: none;
+  }
+  #{{ section_id }} .pf-wa__spiritual .pf-wa__section-eyebrow { color: var(--pf-gold-light); }
+  #{{ section_id }} .pf-wa__spiritual .pf-wa__section-title { color: var(--pf-warm-white); }
+  #{{ section_id }} .pf-wa__spiritual .pf-wa__section-title em { color: var(--pf-gold-light); }
+  #{{ section_id }} .pf-wa__spiritual .pf-wa__section-desc { color: rgba(251,248,242,0.55); }
+  #{{ section_id }} .pf-wa__spiritual-images {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  #{{ section_id }} .pf-wa__spiritual-img {
+    overflow: hidden;
+    aspect-ratio: 4/5;
+  }
+  #{{ section_id }} .pf-wa__spiritual-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.7s ease;
+  }
+  #{{ section_id }} .pf-wa__spiritual-img:hover img { transform: scale(1.06); }
+  #{{ section_id }} .pf-wa__spiritual-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 20px 0 28px;
+  }
+  #{{ section_id }} .pf-wa__tag {
+    border: 1px solid rgba(251,248,242,0.2);
+    color: rgba(251,248,242,0.7);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    padding: 6px 13px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  #{{ section_id }} .pf-wa__tag:hover { border-color: var(--pf-gold); color: var(--pf-gold-light); }
+
+  /* ── BUNDLES ── */
+  #{{ section_id }} .pf-wa__bundles {
+    background: var(--pf-cream-dark);
+    padding: 64px 16px;
+  }
+  #{{ section_id }} .pf-wa__bundle-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  #{{ section_id }} .pf-wa__bundle-card {
+    background: var(--pf-warm-white);
+    border: 0.5px solid var(--pf-border);
+    padding: 28px 24px;
+    position: relative;
+    text-decoration: none;
+    display: block;
+    color: inherit;
+    transition: transform 0.3s;
+  }
+  #{{ section_id }} .pf-wa__bundle-card:hover { transform: translateY(-3px); }
+  #{{ section_id }} .pf-wa__bundle-card--featured {
+    background: var(--pf-bark);
+    border-color: var(--pf-bark);
+  }
+  #{{ section_id }} .pf-wa__bundle-card--featured .pf-wa__bundle-tag { color: var(--pf-gold); }
+  #{{ section_id }} .pf-wa__bundle-card--featured .pf-wa__bundle-name { color: var(--pf-warm-white); }
+  #{{ section_id }} .pf-wa__bundle-card--featured .pf-wa__bundle-desc { color: rgba(251,248,242,0.55); }
+  #{{ section_id }} .pf-wa__bundle-card--featured .pf-wa__bundle-items li { color: rgba(251,248,242,0.6); }
+  #{{ section_id }} .pf-wa__bundle-card--featured .pf-wa__bundle-items li::before { color: var(--pf-gold); }
+  #{{ section_id }} .pf-wa__bundle-card--featured .pf-wa__bundle-price { color: var(--pf-warm-white); }
+  #{{ section_id }} .pf-wa__bundle-card--featured .pf-wa__bundle-savings { background: var(--pf-gold); color: var(--pf-bark); }
+  #{{ section_id }} .pf-wa__bundle-card--featured .pf-wa__btn-bundle { background: var(--pf-gold); color: var(--pf-bark); border-color: var(--pf-gold); }
+  #{{ section_id }} .pf-wa__featured-star {
+    position: absolute;
+    top: 14px; right: 14px;
+    background: var(--pf-gold);
+    color: var(--pf-bark);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 3px 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  #{{ section_id }} .pf-wa__bundle-tag {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--pf-sage);
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  #{{ section_id }} .pf-wa__bundle-name {
+    font-family: var(--font-heading-family, Georgia, serif);
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--pf-bark);
+    margin-bottom: 8px;
+  }
+  #{{ section_id }} .pf-wa__bundle-desc { font-size: 13px; color: var(--pf-text-secondary); line-height: 1.6; margin-bottom: 16px; }
+  #{{ section_id }} .pf-wa__bundle-items { list-style: none; margin-bottom: 20px; }
+  #{{ section_id }} .pf-wa__bundle-items li { font-size: 13px; color: var(--pf-text-secondary); padding: 4px 0; display: flex; align-items: center; gap: 8px; }
+  #{{ section_id }} .pf-wa__bundle-items li::before { content: '—'; color: var(--pf-gold); font-size: 10px; flex-shrink: 0; }
+  #{{ section_id }} .pf-wa__bundle-price-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  #{{ section_id }} .pf-wa__bundle-price { font-size: 26px; font-weight: 500; color: var(--pf-bark); }
+  #{{ section_id }} .pf-wa__bundle-savings { background: var(--pf-sage); color: var(--pf-cream); font-size: 10px; letter-spacing: 0.06em; padding: 3px 8px; font-weight: 500; }
+  #{{ section_id }} .pf-wa__btn-bundle { display: block; text-align: center; border: 1.5px solid var(--pf-bark); color: var(--pf-bark); padding: 12px; font-size: 12px; letter-spacing: 0.08em; font-weight: 500; text-decoration: none; transition: background 0.2s, color 0.2s; font-family: inherit; background: none; cursor: pointer; width: 100%; }
+  #{{ section_id }} .pf-wa__btn-bundle:hover { background: var(--pf-bark); color: var(--pf-cream); }
+
+  /* ── WHY US ── */
+  #{{ section_id }} .pf-wa__why { padding: 64px 16px; }
+  #{{ section_id }} .pf-wa__why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  #{{ section_id }} .pf-wa__why-item {
+    padding: 28px 20px;
+    text-align: center;
+    border-right: 0.5px solid var(--pf-border);
+    border-bottom: 0.5px solid var(--pf-border);
+  }
+  #{{ section_id }} .pf-wa__why-item:nth-child(2n) { border-right: none; }
+  #{{ section_id }} .pf-wa__why-item:nth-last-child(-n+2) { border-bottom: none; }
+  #{{ section_id }} .pf-wa__why-icon {
+    width: 48px; height: 48px;
+    background: var(--pf-cream-dark);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+  }
+  #{{ section_id }} .pf-wa__why-icon svg {
+    width: 22px; height: 22px;
+    stroke: var(--pf-bark);
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  #{{ section_id }} .pf-wa__why-title { font-family: var(--font-heading-family, Georgia, serif); font-size: 17px; font-weight: 400; color: var(--pf-bark); margin-bottom: 6px; }
+  #{{ section_id }} .pf-wa__why-desc { font-size: 12px; color: var(--pf-text-secondary); line-height: 1.65; }
+
+  /* ── FAQ ── */
+  #{{ section_id }} .pf-wa__faq { padding: 64px 16px; background: var(--pf-warm-white); }
+  #{{ section_id }} .pf-wa__faq-item { border-bottom: 0.5px solid var(--pf-border); }
+  #{{ section_id }} .pf-wa__faq-q {
+    padding: 18px 0;
+    font-size: 14px;
+    color: var(--pf-bark);
+    font-weight: 400;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    transition: color 0.2s;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+  }
+  #{{ section_id }} .pf-wa__faq-q:hover { color: var(--pf-sage); }
+  #{{ section_id }} .pf-wa__faq-toggle { font-size: 18px; flex-shrink: 0; color: var(--pf-gold); transition: transform 0.3s; }
+  #{{ section_id }} .pf-wa__faq-a {
+    font-size: 13px;
+    color: var(--pf-text-secondary);
+    line-height: 1.75;
+    padding-bottom: 18px;
+    display: none;
+    font-weight: 300;
+  }
+  #{{ section_id }} .pf-wa__faq-item.pf-wa--open .pf-wa__faq-a { display: block; }
+  #{{ section_id }} .pf-wa__faq-item.pf-wa--open .pf-wa__faq-toggle { transform: rotate(45deg); }
+
+  /* ── BUTTONS ── */
+  #{{ section_id }} .pf-wa__btn-primary {
+    display: inline-block;
+    background: var(--pf-gold);
+    color: var(--pf-bark);
+    border: none;
+    padding: 13px 28px;
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  #{{ section_id }} .pf-wa__btn-primary:hover { background: var(--pf-gold-light); }
+  #{{ section_id }} .pf-wa__btn-ghost {
+    display: inline-block;
+    color: rgba(251,248,242,0.8);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    padding-bottom: 2px;
+    border-bottom: 1px solid rgba(251,248,242,0.25);
+    transition: border-color 0.2s, color 0.2s;
+  }
+  #{{ section_id }} .pf-wa__btn-ghost:hover { border-color: var(--pf-gold-light); color: var(--pf-gold-light); }
+  #{{ section_id }} .pf-wa__btn-outline {
+    display: inline-block;
+    border: 1.5px solid var(--pf-bark);
+    color: var(--pf-bark);
+    padding: 12px 32px;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+  }
+  #{{ section_id }} .pf-wa__btn-outline:hover { background: var(--pf-bark); color: var(--pf-cream); }
+  #{{ section_id }} .pf-wa__btn-sage {
+    display: inline-block;
+    background: var(--pf-gold);
+    color: var(--pf-bark);
+    padding: 13px 28px;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  #{{ section_id }} .pf-wa__btn-sage:hover { background: var(--pf-gold-light); }
+
+  /* ── STICKY CTA ── */
+  #{{ section_id }}-sticky {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--pf-bark);
+    padding: 0 16px 0 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 0;
+    z-index: 999;
+    transform: translateY(100%);
+    transition: transform 0.4s ease;
+    border-top: 2px solid var(--pf-gold);
+    overflow: hidden;
+  }
+  #{{ section_id }}-sticky.pf-wa--visible { transform: translateY(0); }
+  #{{ section_id }}-sticky .pf-wa__sticky-accent {
+    width: 6px;
+    flex-shrink: 0;
+    background: var(--pf-gold);
+  }
+  #{{ section_id }}-sticky .pf-wa__sticky-text {
+    font-size: 12px;
+    color: rgba(251,248,242,0.65);
+    line-height: 1.4;
+    padding: 14px 14px 14px 16px;
+    flex: 1;
+  }
+  #{{ section_id }}-sticky .pf-wa__sticky-text strong { color: #fff; display: block; font-size: 13px; margin-bottom: 1px; }
+  #{{ section_id }}-sticky .pf-wa__btn-primary { padding: 0 22px; font-size: 12px; white-space: nowrap; flex-shrink: 0; align-self: stretch; display: flex; align-items: center; }
+
+  /* ── DESKTOP ── */
+  @media (min-width: 768px) {
+    #{{ section_id }} .pf-wa__hero { flex-direction: row; min-height: 88svh; }
+    #{{ section_id }} .pf-wa__hero-left { flex: 1; padding: 64px 56px; min-height: unset; }
+    #{{ section_id }} .pf-wa__hero-right { flex: 1; }
+    #{{ section_id }} .pf-wa__hero-room { min-height: 300px; }
+    #{{ section_id }} .pf-wa__discount { flex-direction: row; align-items: center; margin: 28px 48px; }
+    #{{ section_id }} .pf-wa__categories { padding: 80px 48px; }
+    #{{ section_id }} .pf-wa__cat-grid { grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 1fr 1fr; }
+    #{{ section_id }} .pf-wa__cat-card--large { grid-row: span 2; min-height: 500px; }
+    #{{ section_id }} .pf-wa__cat-card { min-height: 240px; }
+    #{{ section_id }} .pf-wa__section-header { padding: 0 48px; margin-bottom: 48px; }
+    #{{ section_id }} .pf-wa__section-title { font-size: clamp(32px, 4vw, 52px); }
+    #{{ section_id }} .pf-wa__rooms { padding: 80px 48px; }
+    #{{ section_id }} .pf-wa__rooms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    #{{ section_id }} .pf-wa__room-card img { aspect-ratio: 4/5; }
+    #{{ section_id }} .pf-wa__featured { padding: 80px 48px; }
+    #{{ section_id }} .pf-wa__paintings-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    #{{ section_id }} .pf-wa__spiritual { padding: 0; display: grid; grid-template-columns: 1fr 1fr; }
+    #{{ section_id }} .pf-wa__spiritual-content { padding: 80px 64px; }
+    #{{ section_id }} .pf-wa__spiritual-media { display: grid; grid-template-columns: 1fr 1fr; }
+    #{{ section_id }} .pf-wa__spiritual-img { aspect-ratio: auto; min-height: 400px; }
+    #{{ section_id }} .pf-wa__bundles { padding: 80px 48px; }
+    #{{ section_id }} .pf-wa__bundle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    #{{ section_id }} .pf-wa__why { padding: 80px 48px; }
+    #{{ section_id }} .pf-wa__why-grid { grid-template-columns: repeat(4, 1fr); }
+    #{{ section_id }} .pf-wa__why-item { border-right: 0.5px solid var(--pf-border); border-bottom: none; }
+    #{{ section_id }} .pf-wa__why-item:nth-child(2n) { border-right: 0.5px solid var(--pf-border); }
+    #{{ section_id }} .pf-wa__why-item:last-child { border-right: none; }
+    #{{ section_id }} .pf-wa__faq { padding: 80px 48px; }
+    #{{ section_id }}-sticky { padding-right: 48px; }
+    #{{ section_id }}-sticky .pf-wa__sticky-text { padding: 16px 16px 16px 20px; font-size: 13px; }
+    #{{ section_id }}-sticky .pf-wa__sticky-text strong { display: inline; font-size: 13px; margin-bottom: 0; }
+  }
+</style>
+
+<div id="{{ section_id }}">
+
+  {%- comment -%} ── ANNOUNCE BAR ── {%- endcomment -%}
+  {%- if section.settings.show_announce -%}
+  <div class="pf-wa__announce">
+    {{ section.settings.announce_text }}
+    {%- if section.settings.announce_link_text != blank -%}
+    &nbsp;<a href="{{ section.settings.announce_link_url | default: '#' }}">{{ section.settings.announce_link_text }} →</a>
+    {%- endif -%}
+  </div>
+  {%- endif -%}
+
+  {%- comment -%} ── HERO ── {%- endcomment -%}
+  <div class="pf-wa__hero">
+    <div class="pf-wa__hero-left">
+      {%- if section.settings.hero_bg_image -%}
+        <img
+          class="pf-wa__hero-bg"
+          src="{{ section.settings.hero_bg_image | image_url: width: 1200 }}"
+          alt="{{ section.settings.hero_bg_image.alt | escape }}"
+          loading="eager"
+          fetchpriority="high">
+      {%- endif -%}
+      <div class="pf-wa__hero-content">
+        {%- if section.settings.hero_eyebrow != blank -%}
+          <div class="pf-wa__eyebrow">{{ section.settings.hero_eyebrow }}</div>
+        {%- endif -%}
+        <h1 class="pf-wa__hero-title">{{ section.settings.hero_title }}</h1>
+        {%- if section.settings.hero_subtext != blank -%}
+          <p class="pf-wa__hero-sub">{{ section.settings.hero_subtext }}</p>
+        {%- endif -%}
+        <div class="pf-wa__hero-actions">
+          {%- if section.settings.hero_cta_text != blank -%}
+            <a href="{{ section.settings.hero_cta_url | default: '#' }}" class="pf-wa__btn-primary">
+              {{ section.settings.hero_cta_text }} →
+            </a>
+          {%- endif -%}
+          {%- if section.settings.hero_ghost_text != blank -%}
+            <a href="{{ section.settings.hero_ghost_url | default: '#categories' }}" class="pf-wa__btn-ghost">
+              {{ section.settings.hero_ghost_text }}
+            </a>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+    <div class="pf-wa__hero-right">
+      <div class="pf-wa__hero-room">
+        {%- if section.settings.hero_room_image -%}
+          <img
+            src="{{ section.settings.hero_room_image | image_url: width: 900 }}"
+            alt="{{ section.settings.hero_room_image.alt | escape }}"
+            loading="eager">
+        {%- endif -%}
+        {%- if section.settings.hero_room_label != blank -%}
+          <div class="pf-wa__room-label">{{ section.settings.hero_room_label }}</div>
+        {%- endif -%}
+      </div>
+      <div class="pf-wa__hero-stats">
+        <div class="pf-wa__stat">
+          <div class="pf-wa__stat-num">{{ section.settings.stat_1_number | default: '167+' }}</div>
+          <div class="pf-wa__stat-label">{{ section.settings.stat_1_label | default: 'Unique Designs' }}</div>
+        </div>
+        <div class="pf-wa__stat">
+          <div class="pf-wa__stat-num">{{ section.settings.stat_2_number | default: '10' }}</div>
+          <div class="pf-wa__stat-label">{{ section.settings.stat_2_label | default: 'Art Styles' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} ── DISCOUNT STRIP ── {%- endcomment -%}
+  {%- if section.settings.show_discount and section.settings.discount_code != blank -%}
+  <div class="pf-wa__discount">
+    <span class="pf-wa__discount-badge">{{ section.settings.discount_badge | default: 'First Order' }}</span>
+    <p class="pf-wa__discount-text">{{ section.settings.discount_text }}</p>
+    <span class="pf-wa__discount-code">{{ section.settings.discount_code }}</span>
+  </div>
+  {%- endif -%}
+
+  {%- comment -%} ── CATEGORIES ── {%- endcomment -%}
+  {%- if cat_blocks.size > 0 -%}
+  <section class="pf-wa__categories" id="{{ section_id }}-categories">
+    <div class="pf-wa__section-header">
+      <div class="pf-wa__section-eyebrow">{{ section.settings.cat_eyebrow | default: 'Browse by Style' }}</div>
+      <h2 class="pf-wa__section-title">{{ section.settings.cat_title }}</h2>
+      {%- if section.settings.cat_desc != blank -%}
+        <p class="pf-wa__section-desc">{{ section.settings.cat_desc }}</p>
+      {%- endif -%}
+    </div>
+    <div class="pf-wa__cat-grid">
+      {%- for block in cat_blocks -%}
+        <a
+          href="{{ block.settings.url | default: '#' }}"
+          class="pf-wa__cat-card{% if forloop.first %} pf-wa__cat-card--large{% endif %}"
+          {{ block.shopify_attributes }}>
+          {%- if block.settings.image -%}
+            <img
+              src="{{ block.settings.image | image_url: width: 900 }}"
+              alt="{{ block.settings.image.alt | escape | default: block.settings.name }}"
+              loading="lazy">
+          {%- endif -%}
+          <div class="pf-wa__cat-overlay"></div>
+          <div class="pf-wa__cat-arrow">↗</div>
+          <div class="pf-wa__cat-info">
+            {%- if block.settings.tag != blank -%}
+              <div class="pf-wa__cat-tag">{{ block.settings.tag }}</div>
+            {%- endif -%}
+            <div class="pf-wa__cat-name">{{ block.settings.name }}</div>
+            {%- if block.settings.count != blank -%}
+              <div class="pf-wa__cat-count">{{ block.settings.count }}</div>
+            {%- endif -%}
+          </div>
+        </a>
+      {%- endfor -%}
+    </div>
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ── ROOM SECTION ── {%- endcomment -%}
+  {%- if room_blocks.size > 0 -%}
+  <section class="pf-wa__rooms">
+    <div class="pf-wa__section-header">
+      <div class="pf-wa__section-eyebrow">{{ section.settings.rooms_eyebrow | default: 'Room by Room' }}</div>
+      <h2 class="pf-wa__section-title">{{ section.settings.rooms_title }}</h2>
+      {%- if section.settings.rooms_desc != blank -%}
+        <p class="pf-wa__section-desc">{{ section.settings.rooms_desc }}</p>
+      {%- endif -%}
+    </div>
+    <div class="pf-wa__rooms-grid">
+      {%- for block in room_blocks -%}
+        <a href="{{ block.settings.url | default: '#' }}" class="pf-wa__room-card" {{ block.shopify_attributes }}>
+          {%- if block.settings.image -%}
+            <img
+              src="{{ block.settings.image | image_url: width: 700 }}"
+              alt="{{ block.settings.image.alt | escape | default: block.settings.title }}"
+              loading="lazy">
+          {%- endif -%}
+          <div class="pf-wa__room-body">
+            {%- if block.settings.room_type != blank -%}
+              <div class="pf-wa__room-type">{{ block.settings.room_type }}</div>
+            {%- endif -%}
+            <div class="pf-wa__room-title">{{ block.settings.title }}</div>
+            {%- if block.settings.desc != blank -%}
+              <p class="pf-wa__room-desc">{{ block.settings.desc }}</p>
+            {%- endif -%}
+            {%- if block.settings.link_text != blank -%}
+              <span class="pf-wa__room-link">{{ block.settings.link_text }} <span>→</span></span>
+            {%- endif -%}
+          </div>
+        </a>
+      {%- endfor -%}
+    </div>
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ── FEATURED PAINTINGS ── {%- endcomment -%}
+  {%- if painting_blocks.size > 0 -%}
+  <section class="pf-wa__featured">
+    <div class="pf-wa__section-header">
+      <div class="pf-wa__section-eyebrow">{{ section.settings.paintings_eyebrow | default: 'Bestsellers' }}</div>
+      <h2 class="pf-wa__section-title">{{ section.settings.paintings_title }}</h2>
+      {%- if section.settings.paintings_desc != blank -%}
+        <p class="pf-wa__section-desc">{{ section.settings.paintings_desc }}</p>
+      {%- endif -%}
+    </div>
+    <div class="pf-wa__paintings-grid">
+      {%- for block in painting_blocks -%}
+        {%- assign is_gold = false -%}
+        {%- if block.settings.badge_style == 'gold' -%}{%- assign is_gold = true -%}{%- endif -%}
+        <a href="{{ block.settings.url | default: '#' }}" class="pf-wa__painting-card" {{ block.shopify_attributes }}>
+          <div class="pf-wa__painting-img">
+            {%- if block.settings.image -%}
+              <img
+                src="{{ block.settings.image | image_url: width: 600 }}"
+                alt="{{ block.settings.image.alt | escape | default: block.settings.name }}"
+                loading="lazy">
+            {%- endif -%}
+            {%- if block.settings.badge != blank -%}
+              <span class="pf-wa__painting-badge{% if is_gold %} pf-wa__painting-badge--gold{% endif %}">
+                {{ block.settings.badge }}
+              </span>
+            {%- endif -%}
+          </div>
+          <div class="pf-wa__painting-body">
+            {%- if block.settings.category != blank -%}
+              <div class="pf-wa__painting-cat">{{ block.settings.category }}</div>
+            {%- endif -%}
+            <div class="pf-wa__painting-name">{{ block.settings.name }}</div>
+            <div class="pf-wa__painting-price">
+              <span class="pf-wa__painting-price-from">From </span>{{ block.settings.price | default: '₹1,699' }}
+            </div>
+          </div>
+        </a>
+      {%- endfor -%}
+    </div>
+    {%- if section.settings.paintings_cta_text != blank -%}
+      <div class="pf-wa__view-all">
+        <a href="{{ section.settings.paintings_cta_url | default: '#' }}" class="pf-wa__btn-outline">
+          {{ section.settings.paintings_cta_text }} →
+        </a>
+      </div>
+    {%- endif -%}
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ── SPIRITUAL SECTION ── {%- endcomment -%}
+  {%- if section.settings.show_spiritual -%}
+  <section class="pf-wa__spiritual">
+    <div class="pf-wa__spiritual-content">
+      <div class="pf-wa__section-header" style="text-align:left;padding:0;margin-bottom:20px;">
+        <div class="pf-wa__section-eyebrow">{{ section.settings.spiritual_eyebrow | default: 'Spiritual & Vastu Collection' }}</div>
+        <h2 class="pf-wa__section-title">{{ section.settings.spiritual_title }}</h2>
+        {%- if section.settings.spiritual_desc != blank -%}
+          <p class="pf-wa__section-desc" style="margin:0;">{{ section.settings.spiritual_desc }}</p>
+        {%- endif -%}
+      </div>
+      <div class="pf-wa__spiritual-images">
+        {%- if section.settings.spiritual_image_1 -%}
+          <div class="pf-wa__spiritual-img">
+            <img src="{{ section.settings.spiritual_image_1 | image_url: width: 600 }}"
+              alt="{{ section.settings.spiritual_image_1.alt | escape }}" loading="lazy">
+          </div>
+        {%- endif -%}
+        {%- if section.settings.spiritual_image_2 -%}
+          <div class="pf-wa__spiritual-img">
+            <img src="{{ section.settings.spiritual_image_2 | image_url: width: 600 }}"
+              alt="{{ section.settings.spiritual_image_2.alt | escape }}" loading="lazy">
+          </div>
+        {%- endif -%}
+      </div>
+      {%- if spiritual_tags.size > 0 -%}
+      <div class="pf-wa__spiritual-tags">
+        {%- for block in spiritual_tags -%}
+          <span class="pf-wa__tag" {{ block.shopify_attributes }}>{{ block.settings.label }}</span>
+        {%- endfor -%}
+      </div>
+      {%- endif -%}
+      {%- if section.settings.spiritual_cta_text != blank -%}
+        <a href="{{ section.settings.spiritual_cta_url | default: '#' }}" class="pf-wa__btn-sage">
+          {{ section.settings.spiritual_cta_text }} →
+        </a>
+      {%- endif -%}
+    </div>
+    {%- comment -%} Desktop-only right media panel (handled by CSS grid) {%- endcomment -%}
+    <div class="pf-wa__spiritual-media" style="display:none;" aria-hidden="true">
+      {%- if section.settings.spiritual_image_1 -%}
+        <div class="pf-wa__spiritual-img">
+          <img src="{{ section.settings.spiritual_image_1 | image_url: width: 700 }}"
+            alt="" loading="lazy">
+        </div>
+      {%- endif -%}
+      {%- if section.settings.spiritual_image_2 -%}
+        <div class="pf-wa__spiritual-img">
+          <img src="{{ section.settings.spiritual_image_2 | image_url: width: 700 }}"
+            alt="" loading="lazy">
+        </div>
+      {%- endif -%}
+    </div>
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ── BUNDLES ── {%- endcomment -%}
+  {%- if bundle_blocks.size > 0 -%}
+  <section class="pf-wa__bundles">
+    <div class="pf-wa__section-header">
+      <div class="pf-wa__section-eyebrow">{{ section.settings.bundles_eyebrow | default: 'Gallery Wall Packages' }}</div>
+      <h2 class="pf-wa__section-title">{{ section.settings.bundles_title }}</h2>
+      {%- if section.settings.bundles_desc != blank -%}
+        <p class="pf-wa__section-desc">{{ section.settings.bundles_desc }}</p>
+      {%- endif -%}
+    </div>
+    <div class="pf-wa__bundle-grid">
+      {%- for block in bundle_blocks -%}
+        <a
+          href="{{ block.settings.url | default: '#' }}"
+          class="pf-wa__bundle-card{% if block.settings.featured %} pf-wa__bundle-card--featured{% endif %}"
+          {{ block.shopify_attributes }}>
+          {%- if block.settings.featured -%}
+            <span class="pf-wa__featured-star">Most Popular</span>
+          {%- endif -%}
+          <div class="pf-wa__bundle-tag">{{ block.settings.tag }}</div>
+          <div class="pf-wa__bundle-name">{{ block.settings.name }}</div>
+          <p class="pf-wa__bundle-desc">{{ block.settings.desc }}</p>
+          {%- if block.settings.items != blank -%}
+          <ul class="pf-wa__bundle-items">
+            {%- assign item_list = block.settings.items | split: '|' -%}
+            {%- for item in item_list -%}
+              {%- if item != blank -%}
+                <li>{{ item | strip }}</li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+          {%- endif -%}
+          <div class="pf-wa__bundle-price-row">
+            <span class="pf-wa__bundle-price">{{ block.settings.price }}</span>
+            {%- if block.settings.savings != blank -%}
+              <span class="pf-wa__bundle-savings">{{ block.settings.savings }}</span>
+            {%- endif -%}
+          </div>
+          <span class="pf-wa__btn-bundle">{{ block.settings.cta | default: 'Shop Now' }}</span>
+        </a>
+      {%- endfor -%}
+    </div>
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ── WHY US ── {%- endcomment -%}
+  {%- if section.settings.show_why -%}
+  <section class="pf-wa__why">
+    <div class="pf-wa__section-header">
+      <div class="pf-wa__section-eyebrow">{{ section.settings.why_eyebrow | default: 'Why Pillow Fights' }}</div>
+      <h2 class="pf-wa__section-title">{{ section.settings.why_title }}</h2>
+    </div>
+    <div class="pf-wa__why-grid">
+      {%- assign why_svgs = 'frame|print|delivery|returns' | split: '|' -%}
+      {%- for i in (1..4) -%}
+        {%- assign title_key = 'why_title_' | append: i -%}
+        {%- assign desc_key = 'why_desc_' | append: i -%}
+        {%- if section.settings[title_key] != blank -%}
+          <div class="pf-wa__why-item">
+            <div class="pf-wa__why-icon">
+              {%- case i -%}
+              {%- when 1 -%}
+                {%- comment -%} Frame / picture {%- endcomment -%}
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="18" rx="1"/>
+                  <rect x="6" y="6" width="12" height="12" rx="0.5"/>
+                  <line x1="9" y1="9" x2="15" y2="15"/>
+                  <line x1="15" y1="9" x2="9" y2="15"/>
+                </svg>
+              {%- when 2 -%}
+                {%- comment -%} Colour palette / ink {%- endcomment -%}
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                  <circle cx="12" cy="9" r="2.5"/>
+                </svg>
+              {%- when 3 -%}
+                {%- comment -%} Delivery box {%- endcomment -%}
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                  <line x1="12" y1="22.08" x2="12" y2="12"/>
+                </svg>
+              {%- when 4 -%}
+                {%- comment -%} Return / refresh arrows {%- endcomment -%}
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <polyline points="1 4 1 10 7 10"/>
+                  <polyline points="23 20 23 14 17 14"/>
+                  <path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/>
+                </svg>
+              {%- endcase -%}
+            </div>
+            <div class="pf-wa__why-title">{{ section.settings[title_key] }}</div>
+            <p class="pf-wa__why-desc">{{ section.settings[desc_key] }}</p>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </section>
+  {%- endif -%}
+
+  {%- comment -%} ── FAQ ── {%- endcomment -%}
+  {%- if faq_blocks.size > 0 -%}
+  <section class="pf-wa__faq">
+    <div class="pf-wa__section-header">
+      <div class="pf-wa__section-eyebrow">{{ section.settings.faq_eyebrow | default: 'Common Questions' }}</div>
+      <h2 class="pf-wa__section-title">{{ section.settings.faq_title }}</h2>
+    </div>
+    <div style="max-width:680px;margin:0 auto;">
+      {%- for block in faq_blocks -%}
+        <div class="pf-wa__faq-item" {{ block.shopify_attributes }}>
+          <button class="pf-wa__faq-q" onclick="pfWaToggleFaq(this)" type="button">
+            <span>{{ block.settings.question }}</span>
+            <span class="pf-wa__faq-toggle">+</span>
+          </button>
+          <div class="pf-wa__faq-a">{{ block.settings.answer }}</div>
+        </div>
+      {%- endfor -%}
+    </div>
+  </section>
+  {%- endif -%}
+
+</div>
+
+{%- comment -%} ── STICKY CTA (outside scoped div for fixed positioning) ── {%- endcomment -%}
+{%- if section.settings.show_sticky_cta -%}
+<div id="{{ section_id }}-sticky">
+  <div class="pf-wa__sticky-accent"></div>
+  <div class="pf-wa__sticky-text">
+    <strong>{{ section.settings.sticky_title | default: section.settings.stat_1_number | append: ' paintings' }}</strong>
+    {{ section.settings.sticky_subtitle | default: 'Free delivery across India' }}
+  </div>
+  <a href="{{ section.settings.hero_cta_url | default: '#' }}" class="pf-wa__btn-primary">
+    {{ section.settings.sticky_cta_text | default: 'Shop Now' }} →
+  </a>
+</div>
+{%- endif -%}
+
+<script>
+  (function() {
+    var sid = {{ section_id | json }};
+
+    function pfWaToggleFaq(btn) {
+      var item = btn.parentElement;
+      var isOpen = item.classList.contains('pf-wa--open');
+      var container = item.parentElement;
+      container.querySelectorAll('.pf-wa--open').forEach(function(el) { el.classList.remove('pf-wa--open'); });
+      if (!isOpen) item.classList.add('pf-wa--open');
+    }
+    window.pfWaToggleFaq = pfWaToggleFaq;
+
+    var sticky = document.getElementById(sid + '-sticky');
+    if (sticky) {
+      var triggered = false;
+      window.addEventListener('scroll', function() {
+        if (window.scrollY > 500) {
+          if (!triggered) { sticky.classList.add('pf-wa--visible'); triggered = true; }
+        } else {
+          if (triggered) { sticky.classList.remove('pf-wa--visible'); triggered = false; }
+        }
+      }, { passive: true });
+    }
+
+    /* Desktop spiritual panel reveal */
+    var mediaPanel = document.querySelector('#' + sid + ' .pf-wa__spiritual-media');
+    if (mediaPanel && window.innerWidth >= 768) {
+      mediaPanel.style.display = 'grid';
+      var innerImages = document.querySelector('#' + sid + ' .pf-wa__spiritual-images');
+      if (innerImages) innerImages.style.display = 'none';
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Wall Art Collection",
+  "tag": "section",
+  "class": "pf-wall-art-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "🎨 Colours"
+    },
+    { "type": "color", "id": "color_cream", "label": "Background cream", "default": "#F5F0E8" },
+    { "type": "color", "id": "color_cream_dark", "label": "Surface dark", "default": "#EDE6D6" },
+    { "type": "color", "id": "color_bark", "label": "Dark / primary", "default": "#2C2416" },
+    { "type": "color", "id": "color_sage", "label": "Sage / green", "default": "#3D5040" },
+    { "type": "color", "id": "color_gold", "label": "Gold accent", "default": "#B8973A" },
+
+    {
+      "type": "header",
+      "content": "📢 Announce Bar"
+    },
+    { "type": "checkbox", "id": "show_announce", "label": "Show announce bar", "default": true },
+    { "type": "richtext", "id": "announce_text", "label": "Announce text", "default": "<p>✦ Free delivery across India — Express 24hr in Delhi NCR &nbsp;|&nbsp; Use <strong>WELCOME10</strong> for 10% off your first order</p>" },
+    { "type": "text", "id": "announce_link_text", "label": "Link text", "default": "Shop Now" },
+    { "type": "url", "id": "announce_link_url", "label": "Link URL" },
+
+    {
+      "type": "header",
+      "content": "🖼 Hero"
+    },
+    { "type": "image_picker", "id": "hero_bg_image", "label": "Hero background image (dark panel)" },
+    { "type": "image_picker", "id": "hero_room_image", "label": "Hero room photo (right panel)" },
+    { "type": "text", "id": "hero_eyebrow", "label": "Eyebrow text", "default": "Wall Art & Painting Collection" },
+    { "type": "richtext", "id": "hero_title", "label": "Hero title (use <em> for italic gold)", "default": "<p>Transform Any <em>Blank Wall</em> Into a Story</p>" },
+    { "type": "textarea", "id": "hero_subtext", "label": "Hero subtext", "default": "167 curated paintings across 10 artistic styles — framed in India, delivered to your door." },
+    { "type": "text", "id": "hero_cta_text", "label": "Primary CTA text", "default": "Explore All Art" },
+    { "type": "url", "id": "hero_cta_url", "label": "Primary CTA URL" },
+    { "type": "text", "id": "hero_ghost_text", "label": "Ghost link text", "default": "Browse by Style" },
+    { "type": "url", "id": "hero_ghost_url", "label": "Ghost link URL" },
+    { "type": "text", "id": "hero_room_label", "label": "Room photo label", "default": "Botanical Collection — From ₹1,699" },
+    { "type": "text", "id": "stat_1_number", "label": "Stat 1 number", "default": "167+" },
+    { "type": "text", "id": "stat_1_label", "label": "Stat 1 label", "default": "Unique Designs" },
+    { "type": "text", "id": "stat_2_number", "label": "Stat 2 number", "default": "10" },
+    { "type": "text", "id": "stat_2_label", "label": "Stat 2 label", "default": "Art Styles" },
+
+    {
+      "type": "header",
+      "content": "🚚 Delivery Strip"
+    },
+    { "type": "checkbox", "id": "show_delivery", "label": "Show delivery strip", "default": true },
+    { "type": "text", "id": "delivery_text_1", "label": "Item 1", "default": "<strong>Free shipping</strong> across India" },
+    { "type": "text", "id": "delivery_text_2", "label": "Item 2", "default": "<strong>24hr express</strong> Delhi NCR" },
+    { "type": "text", "id": "delivery_text_3", "label": "Item 3", "default": "A3 · A2 · A1 <strong>sizes available</strong>" },
+    { "type": "text", "id": "delivery_text_4", "label": "Item 4", "default": "<strong>7-day</strong> easy returns" },
+
+    {
+      "type": "header",
+      "content": "🏷 Discount Strip"
+    },
+    { "type": "checkbox", "id": "show_discount", "label": "Show discount strip", "default": true },
+    { "type": "text", "id": "discount_badge", "label": "Badge text", "default": "First Order" },
+    { "type": "text", "id": "discount_text", "label": "Offer text", "default": "New to Pillow Fights? Use code WELCOME10 for 10% off your first painting" },
+    { "type": "text", "id": "discount_code", "label": "Discount code", "default": "WELCOME10" },
+
+    {
+      "type": "header",
+      "content": "📂 Category Section"
+    },
+    { "type": "text", "id": "cat_eyebrow", "label": "Eyebrow", "default": "Browse by Style" },
+    { "type": "richtext", "id": "cat_title", "label": "Title", "default": "<p>Find Your <em>Perfect</em> Art Style</p>" },
+    { "type": "textarea", "id": "cat_desc", "label": "Description", "default": "From botanical watercolours to spiritual masterpieces — every wall tells a different story." },
+
+    {
+      "type": "header",
+      "content": "🛋 Room Section"
+    },
+    { "type": "text", "id": "rooms_eyebrow", "label": "Eyebrow", "default": "Room by Room" },
+    { "type": "richtext", "id": "rooms_title", "label": "Title", "default": "<p>Art for <em>Every</em> Space</p>" },
+    { "type": "textarea", "id": "rooms_desc", "label": "Description", "default": "The right painting transforms a room in minutes." },
+
+    {
+      "type": "header",
+      "content": "⭐ Paintings Section"
+    },
+    { "type": "text", "id": "paintings_eyebrow", "label": "Eyebrow", "default": "Bestsellers" },
+    { "type": "richtext", "id": "paintings_title", "label": "Title", "default": "<p>Hand-Picked <em>Favourites</em></p>" },
+    { "type": "textarea", "id": "paintings_desc", "label": "Description", "default": "Our most-loved paintings — chosen for any Indian home." },
+    { "type": "text", "id": "paintings_cta_text", "label": "View all text", "default": "View All 167 Paintings" },
+    { "type": "url", "id": "paintings_cta_url", "label": "View all URL" },
+
+    {
+      "type": "header",
+      "content": "🕉 Spiritual Section"
+    },
+    { "type": "checkbox", "id": "show_spiritual", "label": "Show spiritual section", "default": true },
+    { "type": "text", "id": "spiritual_eyebrow", "label": "Eyebrow", "default": "Spiritual & Vastu Collection" },
+    { "type": "richtext", "id": "spiritual_title", "label": "Title", "default": "<p>Bring <em>Divine Energy</em> Into Your Home</p>" },
+    { "type": "textarea", "id": "spiritual_desc", "label": "Description", "default": "Vastu-aligned art crafted to invite positive energy, prosperity, and blessings." },
+    { "type": "image_picker", "id": "spiritual_image_1", "label": "Spiritual image 1" },
+    { "type": "image_picker", "id": "spiritual_image_2", "label": "Spiritual image 2" },
+    { "type": "text", "id": "spiritual_cta_text", "label": "CTA text", "default": "Shop Spiritual Art" },
+    { "type": "url", "id": "spiritual_cta_url", "label": "CTA URL" },
+
+    {
+      "type": "header",
+      "content": "📦 Bundle Section"
+    },
+    { "type": "text", "id": "bundles_eyebrow", "label": "Eyebrow", "default": "Gallery Wall Packages" },
+    { "type": "richtext", "id": "bundles_title", "label": "Title", "default": "<p>Save More, <em>Decorate More</em></p>" },
+    { "type": "textarea", "id": "bundles_desc", "label": "Description", "default": "Curated bundles for every room. All frames included." },
+
+    {
+      "type": "header",
+      "content": "✅ Why Us"
+    },
+    { "type": "checkbox", "id": "show_why", "label": "Show why us section", "default": true },
+    { "type": "text", "id": "why_eyebrow", "label": "Eyebrow", "default": "Why Pillow Fights" },
+    { "type": "richtext", "id": "why_title", "label": "Title", "default": "<p>Crafted to <em>Last</em></p>" },
+    { "type": "text", "id": "why_title_1", "label": "Title 1", "default": "Premium Frames" },
+    { "type": "textarea", "id": "why_desc_1", "label": "Desc 1", "default": "Fiberwood frames with 2mm acrylic glass. Four colour options. Built to protect your art for years." },
+    { "type": "text", "id": "why_title_2", "label": "Title 2", "default": "10-Ink Epson Prints" },
+    { "type": "textarea", "id": "why_desc_2", "label": "Desc 2", "default": "Printed on 200–350 GSM paper or canvas. Colours that stay vivid for decades." },
+    { "type": "text", "id": "why_title_3", "label": "Title 3", "default": "Safe Delivery" },
+    { "type": "textarea", "id": "why_desc_3", "label": "Desc 3", "default": "Custom protective packaging. Arrives undamaged or we replace it, no questions." },
+    { "type": "text", "id": "why_title_4", "label": "Title 4", "default": "7-Day Returns" },
+    { "type": "textarea", "id": "why_desc_4", "label": "Desc 4", "default": "Not in love with it? Return within 7 days for a full refund." },
+
+    {
+      "type": "header",
+      "content": "❓ FAQ Section"
+    },
+    { "type": "text", "id": "faq_eyebrow", "label": "Eyebrow", "default": "Common Questions" },
+    { "type": "richtext", "id": "faq_title", "label": "Title", "default": "<p>Before You <em>Order</em></p>" },
+
+    {
+      "type": "header",
+      "content": "📌 Sticky CTA"
+    },
+    { "type": "checkbox", "id": "show_sticky_cta", "label": "Show sticky CTA bar", "default": true },
+    { "type": "text", "id": "sticky_title", "label": "Sticky title (bold)", "default": "167+ paintings" },
+    { "type": "text", "id": "sticky_subtitle", "label": "Sticky subtitle", "default": "Free delivery across India" },
+    { "type": "text", "id": "sticky_cta_text", "label": "Sticky CTA text", "default": "Shop Now" }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category card",
+      "limit": 8,
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Category image" },
+        { "type": "text", "id": "name", "label": "Category name", "default": "Botanical Art" },
+        { "type": "text", "id": "tag", "label": "Tag label (e.g. Most Popular)" },
+        { "type": "text", "id": "count", "label": "Count / price text", "default": "40+ designs · From ₹1,699" },
+        { "type": "url", "id": "url", "label": "Link URL" }
+      ]
+    },
+    {
+      "type": "room",
+      "name": "Room card",
+      "limit": 6,
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Room photo" },
+        { "type": "text", "id": "room_type", "label": "Room type label", "default": "Living Room" },
+        { "type": "text", "id": "title", "label": "Card title", "default": "Statement Walls" },
+        { "type": "textarea", "id": "desc", "label": "Description" },
+        { "type": "text", "id": "link_text", "label": "Link text", "default": "Shop Now" },
+        { "type": "url", "id": "url", "label": "Link URL" }
+      ]
+    },
+    {
+      "type": "painting",
+      "name": "Featured painting",
+      "limit": 8,
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Painting image" },
+        { "type": "text", "id": "name", "label": "Painting name", "default": "Serene Blush Amaryllis" },
+        { "type": "text", "id": "category", "label": "Category", "default": "Botanical" },
+        { "type": "text", "id": "price", "label": "Price", "default": "₹1,699" },
+        { "type": "text", "id": "badge", "label": "Badge text (e.g. Bestseller)" },
+        {
+          "type": "select",
+          "id": "badge_style",
+          "label": "Badge colour",
+          "options": [
+            { "value": "sage", "label": "Sage (default)" },
+            { "value": "gold", "label": "Gold" }
+          ],
+          "default": "sage"
+        },
+        { "type": "url", "id": "url", "label": "Product URL" }
+      ]
+    },
+    {
+      "type": "spiritual_tag",
+      "name": "Spiritual tag",
+      "limit": 8,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Tag label", "default": "Lord Shiva" }
+      ]
+    },
+    {
+      "type": "bundle",
+      "name": "Bundle card",
+      "limit": 4,
+      "settings": [
+        { "type": "text", "id": "tag", "label": "Bundle tier label", "default": "Starter" },
+        { "type": "text", "id": "name", "label": "Bundle name", "default": "Gallery Wall Starter" },
+        { "type": "textarea", "id": "desc", "label": "Short description" },
+        { "type": "textarea", "id": "items", "label": "Items (separate with | pipe)", "default": "3 A3 prints of your choice | Black or white frames included | Hanging kit included | Ships in 3–5 days" },
+        { "type": "text", "id": "price", "label": "Price", "default": "₹3,999" },
+        { "type": "text", "id": "savings", "label": "Savings label", "default": "Save ₹1,098" },
+        { "type": "text", "id": "cta", "label": "CTA button text", "default": "Build Your Bundle" },
+        { "type": "checkbox", "id": "featured", "label": "Mark as featured (dark card)", "default": false },
+        { "type": "url", "id": "url", "label": "Bundle URL" }
+      ]
+    },
+    {
+      "type": "faq",
+      "name": "FAQ item",
+      "limit": 10,
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question", "default": "What sizes are available?" },
+        { "type": "richtext", "id": "answer", "label": "Answer", "default": "<p>We offer A3, A2, and A1 sizes. A3 for small walls, A2 for medium walls, A1 for large feature walls.</p>" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Wall Art Collection",
+      "blocks": [
+        { "type": "category", "settings": { "name": "Botanical Art", "tag": "Most Popular", "count": "40+ designs · From ₹1,699" } },
+        { "type": "category", "settings": { "name": "Landscape Art", "count": "From ₹1,699" } },
+        { "type": "category", "settings": { "name": "Abstract Art", "count": "From ₹1,699" } },
+        { "type": "category", "settings": { "name": "Lord Shiva Art", "tag": "Spiritual", "count": "Vastu-aligned · From ₹1,699" } },
+        { "type": "category", "settings": { "name": "Travel Art", "count": "From ₹1,699" } },
+        { "type": "room", "settings": { "room_type": "Living Room", "title": "Statement Walls", "desc": "Large A1 landscapes or abstract pieces as focal points.", "link_text": "Shop Abstract & Landscape" } },
+        { "type": "room", "settings": { "room_type": "Bedroom", "title": "Calm & Serene", "desc": "Soft botanical watercolours for a restful atmosphere.", "link_text": "Shop Botanical" } },
+        { "type": "room", "settings": { "room_type": "Puja Room", "title": "Sacred Energy", "desc": "Lord Shiva, 7 Horse Vastu art for positive energy.", "link_text": "Shop Spiritual Art" } },
+        { "type": "painting", "settings": { "name": "Serene Blush Amaryllis", "category": "Botanical", "price": "₹1,699", "badge": "Bestseller", "badge_style": "gold" } },
+        { "type": "painting", "settings": { "name": "Golden Garden Medley", "category": "Botanical", "price": "₹1,699", "badge": "New" } },
+        { "type": "painting", "settings": { "name": "Eternal Sunrise Valley", "category": "Landscape", "price": "₹1,699", "badge": "Founder's Pick", "badge_style": "gold" } },
+        { "type": "painting", "settings": { "name": "Orbit of Endless Journeys", "category": "Travel", "price": "₹1,699" } },
+        { "type": "spiritual_tag", "settings": { "label": "Lord Shiva" } },
+        { "type": "spiritual_tag", "settings": { "label": "7 Horse (Vastu)" } },
+        { "type": "spiritual_tag", "settings": { "label": "Radha Krishna" } },
+        { "type": "spiritual_tag", "settings": { "label": "Ganesha" } },
+        { "type": "bundle", "settings": { "tag": "Starter", "name": "Gallery Wall Starter", "desc": "Perfect for a small bedroom wall.", "items": "3 A3 prints of your choice | Frames included | Hanging kit | Ships in 3–5 days", "price": "₹3,999", "savings": "Save ₹1,098", "cta": "Build Your Bundle" } },
+        { "type": "bundle", "settings": { "tag": "Statement", "name": "Statement Wall Set", "desc": "One bold A1 painting — the room focal point.", "items": "1 A1 art print | Premium framed | 2mm acrylic glass | Ready to hang", "price": "₹3,999", "savings": "Free Frame", "cta": "Shop A1 Prints", "featured": true } },
+        { "type": "bundle", "settings": { "tag": "Full Room", "name": "Room Refresh Bundle", "desc": "Transform your living room or dining space.", "items": "2 A2 prints | Matching frames | Style consultation | Express packing", "price": "₹4,999", "savings": "Save ₹1,399", "cta": "Build Your Bundle" } },
+        { "type": "faq", "settings": { "question": "What sizes are available and which should I pick?" } },
+        { "type": "faq", "settings": { "question": "Which frame colour works with my home?" } },
+        { "type": "faq", "settings": { "question": "How long does delivery take?" } },
+        { "type": "faq", "settings": { "question": "Art print vs canvas — what's the difference?" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

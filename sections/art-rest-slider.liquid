@@ -1,0 +1,211 @@
+<section class="art-of-rest-section">
+  <div class="art-of-rest-container">
+    
+    <!-- Header -->
+    <div class="art-of-rest-header">
+      {% if section.settings.title != blank %}
+        <h3>{{ section.settings.title }}</h3>
+      {% endif %}
+      {% if section.settings.description != blank %}
+        <p>{{ section.settings.description }}</p>
+      {% endif %}
+    </div>
+
+    <!-- Slider -->
+    <div class="swiper art-of-rest-swiper">
+      <div class="swiper-wrapper">
+        {% for block in section.blocks %}
+          <div class="swiper-slide">
+            {% if block.settings.image %}
+              <img src="{{ block.settings.image | img_url: '800x' }}" alt="{{ block.settings.image.alt | escape }}">
+            {% endif %}
+            {% if block.settings.link_label != blank and block.settings.link_url != blank %}
+              <a href="{{ block.settings.link_url }}" class="slide-link">{{ block.settings.link_label }} &gt;</a>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="art-slider-header">
+      <div class="art-slider-nav">
+        <div class="art-slider-button-prev">
+          <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6.3105 12.0258H20.25C20.4489 12.0258 20.6397 12.1049 20.7803 12.2455C20.921 12.3862 21 12.5769 21 12.7758C21 12.9748 20.921 13.1655 20.7803 13.3062C20.6397 13.4468 20.4489 13.5258 20.25 13.5258H6.3105L11.781 18.9948C11.9218 19.1357 12.0009 19.3267 12.0009 19.5258C12.0009 19.725 11.9218 19.916 11.781 20.0568C11.6402 20.1977 11.4492 20.2768 11.25 20.2768C11.0508 20.2768 10.8598 20.1977 10.719 20.0568L3.969 13.3068C3.89915 13.2372 3.84374 13.1544 3.80593 13.0633C3.76812 12.9722 3.74866 12.8745 3.74866 12.7758C3.74866 12.6772 3.76812 12.5795 3.80593 12.4884C3.84374 12.3973 3.89915 12.3145 3.969 12.2448L10.719 5.49485C10.8598 5.35402 11.0508 5.2749 11.25 5.2749C11.4492 5.2749 11.6402 5.35402 11.781 5.49485C11.9218 5.63568 12.0009 5.82669 12.0009 6.02585C12.0009 6.22501 11.9218 6.41602 11.781 6.55685L6.3105 12.0258Z" fill="#757575"/>
+          </svg>
+        </div>
+        <div class="art-slider-button-next">
+          <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.6895 12.0258H3.75C3.55109 12.0258 3.36032 12.1049 3.21967 12.2455C3.07902 12.3862 3 12.5769 3 12.7758C3 12.9748 3.07902 13.1655 3.21967 13.3062C3.36032 13.4468 3.55109 13.5258 3.75 13.5258H17.6895L12.219 18.9948C12.0782 19.1357 11.9991 19.3267 11.9991 19.5258C11.9991 19.725 12.0782 19.916 12.219 20.0568C12.3598 20.1977 12.5508 20.2768 12.75 20.2768C12.9492 20.2768 13.1402 20.1977 13.281 20.0568L20.031 13.3068C20.1008 13.2372 20.1563 13.1544 20.1941 13.0633C20.2319 12.9722 20.2513 12.8745 20.2513 12.7758C20.2513 12.6772 20.2319 12.5795 20.1941 12.4884C20.1563 12.3973 20.1008 12.3145 20.031 12.2448L13.281 5.49485C13.1402 5.35402 12.9492 5.2749 12.75 5.2749C12.5508 5.2749 12.3598 5.35402 12.219 5.49485C12.0782 5.63568 11.9991 5.82669 11.9991 6.02585C11.9991 6.22501 12.0782 6.41602 12.219 6.55685L17.6895 12.0258Z" fill="#333333"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="swiper-progressbar">
+      <div class="swiper-progressbar-fill"></div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+.art-of-rest-section {
+  padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+}
+
+.art-of-rest-container {
+  margin: 0 auto;
+  max-width: {{ section.settings.max_width }}px;
+}
+
+.art-of-rest-header {
+  text-align: center;
+  max-width: 550px;
+  margin: 0 auto 20px;
+}
+
+.art-of-rest-header h3 {
+  font-size: 24px;
+  font-weight: normal;
+  margin-bottom: 10px;
+}
+
+.art-of-rest-header p {
+  font-size: 16px;
+  font-weight: normal;
+  margin: 0;
+}
+
+.art-of-rest-swiper {
+  width: 100%;
+}
+
+.art-of-rest-swiper .swiper-slide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.art-of-rest-swiper img {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.slide-link {
+  margin-top: 8px;
+  font-weight: 500;
+  text-decoration: none;
+  color: #000;
+  align-self: flex-start;
+}
+
+.art-slider-header {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.art-slider-nav {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  justify-content: end;
+  align-items: end;
+}
+
+
+.art-slider-button-prev,
+.art-slider-button-next {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .art-slider-header { display: none; }
+}
+
+.swiper-progressbar {
+  border-bottom: 3px solid black;
+  margin-top: 15px;
+  position: relative;
+}
+
+.swiper-progressbar-fill {
+  background-color: #C49B66;
+  height: 3px;
+  width: 0;
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  transition: width 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .art-of-rest-header h3 { font-size: 20px; }
+  .art-of-rest-header p { font-size: 14px; }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof Swiper !== 'undefined') {
+    var swiper = new Swiper('.art-of-rest-swiper', {
+      slidesPerView: 2,
+      spaceBetween: 20,
+      navigation: {
+        nextEl: '.art-slider-button-next',
+        prevEl: '.art-slider-button-prev',
+      },
+      breakpoints: {
+        320: { slidesPerView: 1.2, spaceBetween: 10 },
+        768: { slidesPerView: 2, spaceBetween: 20 }
+      },
+      on: {
+        slideChange: function () {
+          var progress = (this.activeIndex / (this.slides.length - this.params.slidesPerView)) * 100;
+          document.querySelector('.swiper-progressbar-fill').style.width = progress + '%';
+        }
+      }
+    });
+  }
+});
+</script>
+
+{% schema %}
+{
+  "name": "Art of Rest Slider",
+  "settings": [
+    { "type": "text", "id": "title", "label": "Title", "default": "The Art of Rest, Layered to Perfection" },
+    { "type": "textarea", "id": "description", "label": "Description", "default": "Cloud-soft pillows and breathable quilts—crafted for comfort, designed to elevate every layer of your bed." },
+    { "type": "range", "id": "max_width", "label": "Max Width (px)", "min": 800, "max": 1600, "step": 50, "default": 1200 },
+    { "type": "range", "id": "padding_top", "label": "Padding Top", "min": 0, "max": 120, "step": 5, "default": 40 },
+    { "type": "range", "id": "padding_bottom", "label": "Padding Bottom", "min": 0, "max": 120, "step": 5, "default": 40 }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "link_label", "label": "Link Label", "default": "Shop Pillows" },
+        { "type": "url", "id": "link_url", "label": "Link URL" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Art of Rest Slider",
+      "category": "Custom",
+      "blocks": [
+        { "type": "slide" },
+        { "type": "slide" }
+      ]
+    }
+  ]
+}
+{% endschema %}

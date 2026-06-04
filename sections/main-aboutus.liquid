@@ -1,0 +1,306 @@
+{%- liquid
+  assign intro_text = section.settings.intro_text | replace: '<p>', '<p class="about-intro-text-p">'
+-%}
+
+<div class="pillowfights-about-page-wrapper">
+  <div class="pillowfights-about-page">
+
+    <div class="about-hero">
+      {% if section.settings.heading != blank %}
+        <h1 class="about-title">{{ section.settings.heading }}</h1>
+      {% endif %}
+      
+      {% if section.settings.hero_image != blank %}
+        <div class="about-hero-image-wrapper">
+          <img src="{{ section.settings.hero_image | image_url: width: 2400 }}" 
+               alt="{{ section.settings.hero_image.alt | escape }}"
+               loading="lazy"
+               width="{{ section.settings.hero_image.width }}"
+               height="{{ section.settings.hero_image.height }}">
+        </div>
+      {% else %}
+        <div class="about-hero-image-wrapper">
+          {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg', 'A beautiful lifestyle image' }}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="about-intro-text">
+      {% if section.settings.intro_text != blank %}
+        {{ intro_text }}
+      {% endif %}
+      <a href="#our-story-section-{{ section.id }}" class="story-link">OUR STORY</a>
+    </div>
+
+    {% if section.blocks.size > 0 %}
+      <div class="about-image-gallery">
+        {% for block in section.blocks %}
+          {% if block.type == 'image' %}
+            <div class="gallery-item fade-in" style="animation-delay: {{ forloop.index | times: 150 }}ms;">
+              {% if block.settings.gallery_image != blank %}
+                <img src="{{ block.settings.gallery_image | image_url: width: 800 }}" 
+                     alt="{{ block.settings.gallery_image.alt | escape }}"
+                     loading="lazy"
+                     width="{{ block.settings.gallery_image.width }}"
+                     height="{{ block.settings.gallery_image.height }}">
+              {% else %}
+                {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div id="our-story-section-{{ section.id }}" class="about-full-story fade-in">
+      <div class="story-content">
+        {% if section.settings.story_content != blank %}
+          {{ section.settings.story_content }}
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<style>
+  .pillowfights-about-page-wrapper {
+    --font-body: 'Montserrat', sans-serif;
+    --font-heading: 'Lora', serif;
+    --color-text: #2d2d2d;
+    --color-accent: {{ section.settings.accent_color }}; /* UPDATED to use brand color */
+    
+    background-color: var(--color-background);
+    color: var(--color-text);
+    font-family: var(--font-body);
+  }
+
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+  
+  .fade-in.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .pillowfights-about-page {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    box-sizing: border-box;
+  }
+
+  .about-hero {
+    text-align: center;
+    margin-bottom: 6vw;
+  }
+
+  .about-title {
+    font-family: var(--font-heading);
+    font-size: clamp(28px, 5vw, 42px);
+    letter-spacing: 0.2em;
+    font-weight: 400;
+    text-transform: uppercase;
+    margin: 20px 0 40px;
+    color: var(--color-text);
+  }
+
+  .about-hero-image-wrapper img, .about-hero-image-wrapper .placeholder-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  .about-intro-text {
+    max-width: 750px;
+    margin: 0 auto 8vw auto;
+    text-align: center;
+  }
+
+  .about-intro-text-p {
+    font-family: var(--font-heading);
+    font-style: italic;
+    font-size: clamp(18px, 2.5vw, 24px);
+    line-height: 1.6;
+    margin: 0 0 30px 0;
+    color: #555;
+  }
+  
+  .story-link {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    text-decoration: none;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--color-accent);
+    transition: color 0.3s ease, border-bottom-color 0.3s ease;
+  }
+
+  .story-link:hover {
+    color: var(--color-text);
+    border-bottom-color: var(--color-text);
+  }
+
+  .about-image-gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-bottom: 8vw;
+  }
+
+  .gallery-item {
+    background: #fff;
+  }
+
+  .gallery-item img, .gallery-item .placeholder-svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .gallery-item:hover img {
+    transform: scale(1.03);
+  }
+
+  .about-full-story {
+    padding-top: 40px; 
+    border-top: 1px solid #e0d9d1;
+  }
+
+  .story-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .story-content h2 {
+    font-family: var(--font-heading);
+    color: var(--color-text);
+    font-size: clamp(24px, 4vw, 32px);
+    font-weight: 500;
+    margin: 20px 0 15px 0;
+  }
+
+  .story-content p {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #444;
+    margin-bottom: 25px;
+  }
+
+  @media (max-width: 768px) {
+    .pillowfights-about-page {
+      padding: 30px 15px;
+    }
+    
+    .about-image-gallery {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const faders = document.querySelectorAll('.fade-in');
+  if (faders.length === 0) return;
+
+  const appearOptions = {
+    threshold: 0.15,
+    rootMargin: "0px 0px -50px 0px"
+  };
+
+  const appearOnScroll = new IntersectionObserver(function(entries, appearOnScroll) {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) {
+        return;
+      } else {
+        entry.target.classList.add('is-visible');
+        appearOnScroll.unobserve(entry.target);
+      }
+    });
+  }, appearOptions);
+
+  faders.forEach(fader => {
+    appearOnScroll.observe(fader);
+  });
+});
+</script>
+
+{% schema %}
+{
+  "name": "About Us Page",
+  "settings": [
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Brand Accent Color",
+      "default": "#c49b66"
+    },
+    {
+      "type": "header",
+      "content": "Hero Section"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Headline",
+      "default": "OUR STORY"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero Image"
+    },
+    {
+      "type": "header",
+      "content": "Introductory Text"
+    },
+    {
+      "type": "richtext",
+      "id": "intro_text",
+      "label": "Intro Paragraph",
+      "default": "<p>At Pillow Fights, we believe a home should be a collection of stories. It’s a space not for perfection, but for personality. Founded by Farha Jha, our journey began with a simple desire: to find objects that felt as soulful and authentic as the homes they would live in.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Main Story Section"
+    },
+    {
+      "type": "richtext",
+      "id": "story_content",
+      "label": "Full Story Content",
+      "default": "<h2>A Pursuit of the Authentic</h2><p>Pillow Fights was born not in a boardroom, but from a personal quest. Our founder, Farha Jha, grew weary of a world filled with the mass-produced and the momentary. She sought objects with a story, pieces that resonated with a deeper sense of history and heart. This search took her on a journey, rediscovering the profound beauty of heritage craftsmanship and the quiet power of natural materials. Pillow Fights is the culmination of that journey—a curated collection for those who believe their home deserves more than just things; it deserves treasures.</p><h2>The Meaning of “Pillow Fights”</h2><p>The name is our philosophy. It’s a celebration of the home as a haven for life in all its beautiful imperfection. It’s the laughter that echoes in a hallway, the comfort of a quiet morning, the shared moments that are perfectly unscripted. Our pieces are not meant for a showroom; they are designed to be the silent, elegant witnesses to your life. They are the sturdy wooden bowl holding fruit on your counter, the warm glow of a brass lamp in the evening—the timeless anchors in the joyful, everyday moments.</p><h2>An Ode to Living Materials</h2><p>We choose to work with wood, copper, and brass because they are alive with character. We celebrate the unique, swirling grain in every piece of timber, a story of its life as a tree. We are captivated by the way brass and copper develop a rich patina over time, a beautiful map of their journey with you. These are not static materials; they are honest, elemental, and they carry a warmth that connects us to the natural world. They don't just occupy a space; they enrich it.</p><h2>In Dialogue with Masters</h2><p>Each Pillow Fights piece is a conversation between contemporary design and generational wisdom. We collaborate directly with master artisans across India, creators who see their craft not as a job, but as a legacy. This partnership is a delicate dance of respect and innovation—honoring traditional techniques while imagining them in a modern context. When you bring one of our pieces into your home, you are holding more than an object; you are holding heritage in your hands.</p>"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Gallery Image",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "gallery_image",
+          "label": "Image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "About Us Page"
+    }
+  ]
+}
+{% endschema %}

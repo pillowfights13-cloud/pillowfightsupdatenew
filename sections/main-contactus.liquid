@@ -1,0 +1,739 @@
+<div class="contact-container">
+  <h1 class="">Get Support</h1>
+  <p class="contact-container-sub-heading">
+    We're here to help you find the perfect pieces for your home. Whether you have a question about our products, need
+    styling advice, or want to know more about our craftsmanship, our team is just a message away.
+  </p>
+
+  <div class="main-contact-container">
+    <div class="contact-info-container">
+      <h4>Get in Touch</h4>
+      <ul>
+        <li>Email : <a href="mailto:contact@pillowfights.com">contact@pillowfights.com</a></li>
+        <li>Phone : <a href="tel:+91-9811413401">+91-9811413401</a></li>
+        <li>
+          Address :
+          <a href="https://www.google.com/maps/place/Pillow+Fights/@22.578519,88.365625,17z/data=!3m1!4b1!4m5!3m4!1s0x3a1e75a3f37f9f65:0x7fdb06b5f97aa76!8m2!3d22.578519!4d88.365625"
+            >Pillow Fights, L-60, Lower, Ground Floor, Block L, Kalkaji, New Delhi, Delhi 110019</a
+          >
+        </li>
+        <li>Hours: Mon–Sat, 10:00 AM – 7:00 PM (IST)</li>
+      </ul>
+
+      
+      <div class="contact-important-info-link">
+        <a target="_blank" href="https://forms.gle/rJeC84CzU3xapec29">
+        <div class="important-info-link-container">
+          <p>Return or exchange an order</p>
+          {% render 'right-mark' %}
+        </div>
+        </a>
+
+        <a target="_blank" href="https://www.delhivery.com/tracking">
+        <div class="important-info-link-container">
+          <p>Track my shipment</p>
+          {% render 'right-mark' %}
+        </div>
+        </a>
+
+        <div class="important-info-link-container">
+          <p>View warranty policy</p>
+          {% render 'right-mark' %}
+        </div>
+
+        <div class="important-info-link-container">
+          <p>Find Us</p>
+          {% render 'right-mark' %}
+        </div>
+      </div>
+    </div>
+
+    {% comment %}
+      main contact form section
+    {% endcomment %}
+
+    <div class="contact-form-container">
+      <h3>Contact Us</h3>
+      <hr>
+
+      {%- comment -%} Success Message {%- endcomment -%}
+      {%- if form.posted_successfully? -%}
+        <div class="form-message form-message--success" id="success-message">
+          <div class="form-message-icon">✓</div>
+          <div class="form-message-content">
+            <h4>Thank you!</h4>
+            <p>Your message has been sent successfully. We'll get back to you soon!</p>
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} Error Messages {%- endcomment -%}
+      {%- if form.errors -%}
+        <div class="form-message form-message--error" id="error-message">
+          <div class="form-message-icon">!</div>
+          <div class="form-message-content">
+            <h4>Please fix the following errors:</h4>
+            <ul>
+              {%- for error in form.errors -%}
+                <li>{{ error }}</li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} Live Error Container (for JavaScript validation) {%- endcomment -%}
+      <div class="form-message form-message--error" id="live-error-message" style="display: none;">
+        <div class="form-message-icon">!</div>
+        <div class="form-message-content">
+          <h4>Please fix the following errors:</h4>
+          <ul id="live-error-list"></ul>
+        </div>
+      </div>
+
+      {% form 'contact', class: 'contact-form', id: 'contact-form' %}
+        <div class="form-group-container-outter">
+          <div class="form-group-container">
+            <label for="name">Full Name</label>
+            <input required type="text" name="contact[name]" id="name" placeholder="Enter your name" value="{{ form.name }}">
+            <div class="field-error" id="name-error"></div>
+          </div>
+
+          <div class="form-group-container">
+            <label for="email">Email</label>
+            <input required type="email" name="contact[email]" id="email" placeholder="your@email.com" value="{{ form.email }}">
+            <div class="field-error" id="email-error"></div>
+          </div>
+
+          <div class="form-group-container">
+            <label for="subject">Subject</label>
+            <input type="text" name="contact[subject]" id="subject" placeholder="Enter your subject" value="{{ form.subject }}">
+            <div class="field-error" id="subject-error"></div>
+          </div>
+
+          <div class="form-group-container">
+            <label for="textarea">Message</label>
+            <textarea
+              required
+              cols="30"
+              rows="10"
+              name="contact[body]"
+              id="textarea"
+              placeholder="Enter your message"
+            >{{ form.body }}</textarea>
+            <div class="field-error" id="textarea-error"></div>
+          </div>
+
+          <div class="submit">
+            <input type="submit" value="Send" id="submit-button">
+          </div>
+          <p class="recaptcha-disclaimer">This site is protected by reCAPTCHA Enterprise and the Google Privacy Policy and Terms of Service apply.</p>
+        </div>
+      {% endform %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .contact-container {
+    width: 90%;
+    margin: 60px auto;
+  }
+
+  .contact-container h1 {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 500 !important;
+  }
+
+  .contact-container-sub-heading {
+    width: 50%;
+    margin: 48px auto;
+    font-size: 1rem;
+    font-weight: 300 !important;
+    text-align: center;
+  }
+
+  .main-contact-container {
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    gap: 60px;
+    width: 80%;
+    margin: 0 auto;
+  }
+
+  .contact-important-info-link {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 100px;
+  }
+
+  .important-info-link-container {
+    border: 1px solid #d9d9d9 !important;
+    padding: 10px 20px;
+    border-radius: 12px;
+    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .contact-info-container {
+    width: 50%;
+  }
+
+  .contact-form-container {
+    border: 1px solid #d9d9d9;
+    width: 50%;
+    border-radius: 12px;
+    padding: 30px;
+  }
+
+  .contact-form-container h3 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    padding: 10px;
+  }
+
+  .contact-form-container hr {
+    background-color: #d9d9d9;
+    width: 100%;
+    height: 1px;
+  }
+
+  /* Form Messages */
+  .form-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px 0;
+    border: 1px solid;
+  }
+
+  .form-message--success {
+    background-color: #f0f9ff;
+    border-color: #22c55e;
+    color: #166534;
+  }
+
+  .form-message--error {
+    background-color: #fef2f2;
+    border-color: #ef4444;
+    color: #dc2626;
+  }
+
+  .form-message-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .form-message--success .form-message-icon {
+    background-color: #22c55e;
+    color: white;
+  }
+
+  .form-message--error .form-message-icon {
+    background-color: #ef4444;
+    color: white;
+  }
+
+  .form-message-content h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .form-message-content p {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .form-message-content ul {
+    margin: 0;
+    padding-left: 16px;
+    font-size: 14px;
+  }
+
+  .form-message-content ul li {
+    margin-bottom: 4px;
+  }
+
+  .form-group-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 30px;
+    position: relative;
+  }
+
+  .form-group-container input {
+    border: 1px solid #d9d9d9;
+    border-radius: 12px;
+    padding: 10px;
+    transition: border-color 0.3s ease;
+  }
+
+  .form-group-container input.error {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+  }
+
+  .form-group-container input.success {
+    border-color: #22c55e;
+    background-color: #f0f9ff;
+  }
+
+  .form-group-container textarea {
+    border: 1px solid #d9d9d9;
+    border-radius: 12px;
+    padding: 10px;
+    transition: border-color 0.3s ease;
+  }
+
+  .form-group-container textarea.error {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+  }
+
+  .form-group-container textarea.success {
+    border-color: #22c55e;
+    background-color: #f0f9ff;
+  }
+
+  .field-error {
+    color: #ef4444;
+    font-size: 12px;
+    margin-top: 4px;
+    display: none;
+  }
+
+  .field-error.show {
+    display: block;
+  }
+
+  .form-group-container-outter {
+    margin-top: 30px;
+  }
+
+  .form-group-container input::placeholder {
+    color: #757575;
+  }
+
+  input:focus{
+    outline: none;
+  }
+
+  textarea:focus{
+    outline: none;
+  }
+
+  input[type="submit"] {
+    margin-top: 20px;
+    width: 100%;
+    background-color: #C49B66;
+    border: 1px solid #D9D9D9;
+    border-radius: 12px;
+    text-align: center;
+    padding: 10px;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  input[type="submit"]:hover {
+    background-color: #B8976A;
+    transform: translateY(-1px);
+  }
+
+  input[type="submit"]:active {
+    transform: translateY(0);
+  }
+
+  input[type="submit"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(196, 155, 102, 0.3);
+  }
+
+  input[type="submit"]:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .recaptcha-disclaimer{
+    margin-top: 12px;
+  }
+
+  /* Tablet Responsive - 1024px and below */
+  @media screen and (max-width: 1024px) {
+    .contact-container {
+      width: 95%;
+      margin: 40px auto;
+    }
+
+    .contact-container-sub-heading {
+      width: 70%;
+      margin: 36px auto;
+    }
+
+    .main-contact-container {
+      width: 90%;
+      gap: 40px;
+    }
+
+    .contact-important-info-link {
+      margin-top: 60px;
+    }
+
+    .contact-form-container {
+      padding: 25px;
+    }
+  }
+
+  /* Mobile Landscape - 768px and below */
+  @media screen and (max-width: 768px) {
+    .contact-container {
+      width: 95%;
+      margin: 30px auto;
+    }
+
+    .contact-container h1 {
+      font-size: 1.6rem;
+    }
+
+    .contact-container-sub-heading {
+      width: 85%;
+      margin: 30px auto;
+      font-size: 0.95rem;
+    }
+
+    .main-contact-container {
+      flex-direction: column;
+      width: 100%;
+      gap: 40px;
+    }
+
+    .contact-info-container {
+      width: 100%;
+      order: 2;
+    }
+
+    .contact-form-container {
+      width: 100%;
+      order: 1;
+      padding: 20px;
+    }
+
+    .contact-important-info-link {
+      margin-top: 40px;
+      gap: 15px;
+    }
+
+    .important-info-link-container {
+      padding: 8px 15px;
+    }
+
+    .important-info-link-container p {
+      font-size: 0.9rem;
+    }
+  }
+
+  /* Mobile Portrait - 480px and below */
+  @media screen and (max-width: 480px) {
+    .contact-container {
+      width: 95%;
+      margin: 20px auto;
+      padding: 0 10px;
+    }
+
+    .contact-container h1 {
+      font-size: 1.4rem;
+    }
+
+    .contact-container-sub-heading {
+      width: 95%;
+      margin: 25px auto;
+      font-size: 0.9rem;
+    }
+
+    .main-contact-container {
+      width: 100%;
+      gap: 30px;
+    }
+
+    .contact-form-container {
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    .contact-form-container h3 {
+      font-size: 1.1rem;
+      padding: 5px;
+    }
+
+    .form-group-container {
+      margin-top: 20px;
+    }
+
+    .form-group-container input,
+    .form-group-container textarea {
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    .contact-important-info-link {
+      grid-template-columns: 1fr;
+      margin-top: 30px;
+      gap: 12px;
+    }
+
+    .important-info-link-container {
+      padding: 12px 15px;
+    }
+
+    .important-info-link-container p {
+      font-size: 0.85rem;
+    }
+
+    input[type="submit"] {
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    .recaptcha-disclaimer {
+      font-size: 0.8rem;
+      margin-top: 15px;
+    }
+  }
+
+  /* Small Mobile - 360px and below */
+  @media screen and (max-width: 360px) {
+    .contact-container {
+      width: 98%;
+      padding: 0 5px;
+    }
+
+    .contact-container h1 {
+      font-size: 1.3rem;
+    }
+
+    .contact-container-sub-heading {
+      width: 98%;
+      font-size: 0.85rem;
+    }
+
+    .contact-form-container {
+      padding: 12px;
+    }
+
+    .form-group-container input,
+    .form-group-container textarea {
+      padding: 10px;
+    }
+
+    .important-info-link-container {
+      padding: 10px 12px;
+    }
+
+    .important-info-link-container p {
+      font-size: 0.8rem;
+    }
+
+    .recaptcha-disclaimer {
+      font-size: 0.75rem;
+    }
+  }
+
+  /* Very Wide Screens - 1400px and above */
+  @media screen and (min-width: 1400px) {
+    .contact-container {
+      width: 85%;
+    }
+
+    .main-contact-container {
+      width: 70%;
+    }
+
+    .contact-container-sub-heading {
+      width: 40%;
+    }
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('contact-form');
+  const submitButton = document.getElementById('submit-button');
+  const liveErrorMessage = document.getElementById('live-error-message');
+  const liveErrorList = document.getElementById('live-error-list');
+  
+  // Form fields
+  const nameField = document.getElementById('name');
+  const emailField = document.getElementById('email');
+  const subjectField = document.getElementById('subject');
+  const messageField = document.getElementById('textarea');
+  
+  // Error containers
+  const nameError = document.getElementById('name-error');
+  const emailError = document.getElementById('email-error');
+  const subjectError = document.getElementById('subject-error');
+  const messageError = document.getElementById('textarea-error');
+
+  // Email validation regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Validation functions
+  function validateName() {
+    const value = nameField.value.trim();
+    if (value.length < 2) {
+      showFieldError(nameField, nameError, 'Name must be at least 2 characters long');
+      return false;
+    }
+    hideFieldError(nameField, nameError);
+    return true;
+  }
+
+  function validateEmail() {
+    const value = emailField.value.trim();
+    if (!value) {
+      showFieldError(emailField, emailError, 'Email is required');
+      return false;
+    }
+    if (!emailRegex.test(value)) {
+      showFieldError(emailField, emailError, 'Please enter a valid email address');
+      return false;
+    }
+    hideFieldError(emailField, emailError);
+    return true;
+  }
+
+  function validateMessage() {
+    const value = messageField.value.trim();
+    if (value.length < 10) {
+      showFieldError(messageField, messageError, 'Message must be at least 10 characters long');
+      return false;
+    }
+    hideFieldError(messageField, messageError);
+    return true;
+  }
+
+  function showFieldError(field, errorElement, message) {
+    field.classList.add('error');
+    field.classList.remove('success');
+    errorElement.textContent = message;
+    errorElement.classList.add('show');
+  }
+
+  function hideFieldError(field, errorElement) {
+    field.classList.remove('error');
+    field.classList.add('success');
+    errorElement.classList.remove('show');
+    errorElement.textContent = '';
+  }
+
+  function showLiveError(errors) {
+    liveErrorList.innerHTML = '';
+    errors.forEach(error => {
+      const li = document.createElement('li');
+      li.textContent = error;
+      liveErrorList.appendChild(li);
+    });
+    liveErrorMessage.style.display = 'flex';
+    liveErrorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function hideLiveError() {
+    liveErrorMessage.style.display = 'none';
+  }
+
+  // Real-time validation
+  nameField.addEventListener('blur', validateName);
+  nameField.addEventListener('input', function() {
+    if (this.value.trim().length >= 2) {
+      hideFieldError(this, nameError);
+    }
+  });
+
+  emailField.addEventListener('blur', validateEmail);
+  emailField.addEventListener('input', function() {
+    if (emailRegex.test(this.value.trim())) {
+      hideFieldError(this, emailError);
+    }
+  });
+
+  messageField.addEventListener('blur', validateMessage);
+  messageField.addEventListener('input', function() {
+    if (this.value.trim().length >= 10) {
+      hideFieldError(this, messageError);
+    }
+  });
+
+  // Form submission validation
+  form.addEventListener('submit', function(e) {
+    hideLiveError();
+    
+    const isNameValid = validateName();
+    const isEmailValid = validateEmail();
+    const isMessageValid = validateMessage();
+    
+    const errors = [];
+    
+    if (!isNameValid) {
+      errors.push('Please enter a valid name (at least 2 characters)');
+    }
+    
+    if (!isEmailValid) {
+      errors.push('Please enter a valid email address');
+    }
+    
+    if (!isMessageValid) {
+      errors.push('Please enter a message (at least 10 characters)');
+    }
+    
+    if (errors.length > 0) {
+      e.preventDefault();
+      showLiveError(errors);
+      return false;
+    }
+
+    // Show loading state
+    submitButton.disabled = true;
+    submitButton.value = 'Sending...';
+  });
+
+  // Auto-hide success message after 5 seconds
+  const successMessage = document.getElementById('success-message');
+  if (successMessage) {
+    setTimeout(function() {
+      successMessage.style.opacity = '0';
+      setTimeout(function() {
+        successMessage.style.display = 'none';
+      }, 300);
+    }, 5000);
+  }
+
+  // Auto-hide server error message after 10 seconds
+  const errorMessage = document.getElementById('error-message');
+  if (errorMessage) {
+    setTimeout(function() {
+      errorMessage.style.opacity = '0';
+      setTimeout(function() {
+        errorMessage.style.display = 'none';
+      }, 300);
+    }, 10000);
+  }
+});
+</script>

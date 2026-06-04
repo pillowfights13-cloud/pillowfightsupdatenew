@@ -1,0 +1,172 @@
+{%- comment -%}
+  HC Price + Quantity Selector
+  Usage: {%- render 'hc-price-qty', product: product, product_form_id: product_form_id -%}
+{%- endcomment -%}
+
+<style>
+  .hc-pq-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 16px 0;
+  }
+
+  /* ── Price ── */
+  .hc-pq-price__main {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .hc-pq-price__current {
+    font-size: 26px;
+    font-weight: 700;
+    color: #000;
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+
+  .hc-pq-price__compare {
+    font-size: 15px;
+    font-weight: 400;
+    color: #999;
+    text-decoration: line-through;
+  }
+
+  .hc-pq-price__mrp {
+    font-size: 11px;
+    font-weight: 400;
+    color: #999;
+    margin: 5px 0 0;
+    letter-spacing: 0.2px;
+  }
+
+  /* ── Quantity ── */
+  .hc-pq-qty__label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #000;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0 0 6px;
+    text-align: center;
+  }
+
+  .hc-pq-qty .quantity-selector {
+    display: flex;
+    align-items: center;
+    height: 44px;
+    border: 1.5px solid #000;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .hc-pq-qty .quantity-selector__button {
+    background: none;
+    border: none;
+    width: 44px;
+    height: 44px;
+    color: #000;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0;
+    font-size: 18px;
+    font-weight: 300;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s ease;
+  }
+
+  .hc-pq-qty .quantity-selector__button:hover {
+    background: #f5f5f5;
+  }
+
+  .hc-pq-qty .quantity-selector__button:active {
+    background: #ebebeb;
+  }
+
+  .hc-pq-qty .quantity-selector__button[disabled] {
+    opacity: 0.25;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .hc-pq-qty .quantity-selector__input {
+    width: 40px;
+    border: none;
+    outline: none;
+    background: none;
+    font-size: 15px;
+    font-weight: 600;
+    color: #000;
+    text-align: center;
+    -moz-appearance: textfield;
+    padding: 0;
+    height: 44px;
+  }
+
+  .hc-pq-qty .quantity-selector__input::-webkit-outer-spin-button,
+  .hc-pq-qty .quantity-selector__input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
+
+  /* Divider lines between buttons and input */
+  .hc-pq-qty .quantity-selector__button + .quantity-selector__input,
+  .hc-pq-qty .quantity-selector__input + .quantity-selector__button {
+    border-left: 1.5px solid #e0e0e0;
+  }
+
+  @media (max-width: 749px) {
+    .hc-pq-price__current {
+      font-size: 21px;
+    }
+
+    .hc-pq-price__compare {
+      font-size: 13px;
+    }
+
+    .hc-pq-qty .quantity-selector {
+      height: 40px;
+    }
+
+    .hc-pq-qty .quantity-selector__button {
+      width: 40px;
+      height: 40px;
+    }
+
+    .hc-pq-qty .quantity-selector__input {
+      height: 40px;
+    }
+  }
+</style>
+
+<div class="hc-pq-row">
+
+  <div class="hc-pq-price">
+    <div class="hc-pq-price__main">
+      <span class="hc-pq-price__current">
+        {{ product.selected_or_first_available_variant.price | money_without_trailing_zeros }}
+      </span>
+      {%- if product.selected_or_first_available_variant.compare_at_price > product.selected_or_first_available_variant.price -%}
+        <span class="hc-pq-price__compare">
+          {{ product.selected_or_first_available_variant.compare_at_price | money_without_trailing_zeros }}
+        </span>
+      {%- endif -%}
+    </div>
+    <p class="hc-pq-price__mrp">MRP incl. of all taxes</p>
+  </div>
+
+  <div class="hc-pq-qty">
+    <p class="hc-pq-qty__label">Quantity</p>
+    {%- render 'quantity-selector',
+      variant: product.selected_or_first_available_variant,
+      form: product_form_id
+    -%}
+  </div>
+
+</div>

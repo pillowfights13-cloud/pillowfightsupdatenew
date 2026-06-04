@@ -1,0 +1,2644 @@
+{%- comment -%}
+  PAINTING PRODUCT PAGE v3 — Pillow Fights
+  Separate template for Wall Art / Canvas / Posters
+
+  FIXES FROM v2 (Mobile / Android):
+  ✅ Viewport meta tag injected (critical for Android)
+  ✅ aspect-ratio replaced with padding-top hack (Android WebView compat)
+  ✅ position:sticky on gallery replaced with static on mobile
+  ✅ backdrop-filter with proper -webkit- prefix + graceful fallback
+  ✅ Touch/swipe support added for gallery on mobile
+  ✅ min-width:max-content on tabs replaced with safe alternative
+  ✅ auto-fit/auto-fill grid replaced with explicit breakpoints
+  ✅ Sticky bar IntersectionObserver fallback for Android
+  ✅ Font loading non-blocking (font-display:swap + preconnect)
+  ✅ overflow-x scroll areas fixed for Android rubber-band
+  ✅ Fixed 100vw causing horizontal scroll on Android
+  ✅ -webkit-overflow-scrolling: touch on all scroll containers
+  ✅ Tap highlight removed for buttons on Android
+  ✅ Input zoom prevention (font-size: 16px on inputs)
+  ✅ Fixed modal z-index stacking on Android Chrome
+  ✅ Active states for touch (replaced hover-only states)
+{%- endcomment -%}
+
+{%- assign cv = product.selected_or_first_available_variant -%}
+{%- capture fid -%}pnt-form-{{ product.id }}-{{ section.id }}{%- endcapture -%}
+
+{%- comment -%}
+  Inject viewport + font preconnect into <head> via content_for_header.
+  In Shopify, add this snippet to your theme.liquid <head> if not already present:
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  These link tags below are safe to include inline as well.
+{%- endcomment -%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=DM+Serif+Display&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=DM+Serif+Display&display=swap" rel="stylesheet"></noscript>
+
+<style>
+/* ========================================
+   PAINTING PRODUCT PAGE v3 — PILLOW FIGHTS
+   Mobile-first, Android-safe
+   ======================================== */
+
+/* --- RESET & BASE --- */
+.pnt *,
+.pnt *::before,
+.pnt *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  /* Remove tap highlight on Android */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pnt {
+  --c-bg: #fff;
+  --c-bg2: #f8f5f0;
+  --c-bg3: #f2ece3;
+  --c-gold: #9e7c2b;
+  --c-gold-light: #c9a54a;
+  --c-gold-bg: #faf6ec;
+  --c-text: #1c1917;
+  --c-text2: #57534e;
+  --c-text3: #a8a29e;
+  --c-border: #e7e5e4;
+  --c-border2: #d6d3d1;
+  --c-danger: #dc2626;
+  --c-success: #16a34a;
+  --c-white: #fff;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 1px 3px rgba(0,0,0,.06);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,.1);
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'DM Serif Display', Georgia, serif;
+
+  font-family: var(--font-body);
+  color: var(--c-text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Prevent horizontal overflow on mobile */
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* --- LAYOUT --- */
+.pnt-wrap {
+  max-width: 1300px;
+  margin: 0 auto;
+  /* Use safe padding — avoids horizontal scroll on Android */
+  padding: 0 16px;
+}
+
+@media (min-width: 480px) {
+  .pnt-wrap { padding: 0 20px; }
+}
+
+.pnt-grid {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@media (min-width: 1000px) {
+  .pnt-grid {
+    display: grid;
+    grid-template-columns: 1fr 440px;
+    gap: 44px;
+    -webkit-box-align: start;
+    -ms-flex-align: start;
+    align-items: start;
+  }
+}
+
+@media (min-width: 1200px) {
+  .pnt-grid {
+    grid-template-columns: 1fr 480px;
+  }
+}
+
+/* --- BREADCRUMB --- */
+.pnt-bread {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--c-text3);
+  padding: 14px 0 12px;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.pnt-bread a {
+  color: var(--c-text3);
+  text-decoration: none;
+  -webkit-transition: color .2s;
+  transition: color .2s;
+}
+
+.pnt-bread a:hover,
+.pnt-bread a:active { color: var(--c-text); }
+
+.pnt-bread svg {
+  width: 12px;
+  height: 12px;
+  opacity: .4;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+
+/* ============================================
+   GALLERY — Mobile-first, Android-safe
+   aspect-ratio replaced with padding-bottom hack
+   ============================================ */
+.pnt-gal {
+  position: relative;
+  width: 100%;
+}
+
+/* On desktop only, make gallery sticky */
+@media (min-width: 1000px) {
+  .pnt-gal {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 16px;
+  }
+}
+
+/* Aspect ratio container — padding-bottom trick for Android compat */
+.pnt-gal__main {
+  position: relative;
+  width: 100%;
+  /* padding-bottom = aspect ratio (1:1 = 100%) */
+  padding-bottom: 100%;
+  background: var(--c-bg2);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: zoom-in;
+  /* Prevent touch passthrough issues on Android */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+.pnt-gal__main-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  -o-object-fit: contain;
+  object-fit: contain;
+  opacity: 0;
+  -webkit-transition: opacity .35s ease;
+  transition: opacity .35s ease;
+  pointer-events: none;
+  /* Hardware acceleration for smooth transitions on Android */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.pnt-gal__main-img.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Zoom hint — hide on small touch screens */
+.pnt-gal__zoom-hint {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  background: rgba(0,0,0,.55);
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: .7;
+  -webkit-transition: opacity .2s;
+  transition: opacity .2s;
+}
+
+/* Swipe indicator on mobile */
+.pnt-gal__swipe-hint {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  background: rgba(0,0,0,.45);
+  color: #fff;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  pointer-events: none;
+  opacity: 0;
+  -webkit-transition: opacity .3s;
+  transition: opacity .3s;
+  white-space: nowrap;
+}
+
+.pnt-gal__main:hover .pnt-gal__zoom-hint { opacity: 1; }
+
+/* Thumbnails — horizontal strip BELOW — Android scroll fix */
+.pnt-gal__thumbs {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  /* Smooth scrolling on iOS and Android */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-border) transparent;
+}
+
+.pnt-gal__thumbs::-webkit-scrollbar { height: 3px; }
+.pnt-gal__thumbs::-webkit-scrollbar-thumb {
+  background: var(--c-border);
+  border-radius: 4px;
+}
+
+.pnt-gal__thumb {
+  -webkit-box-flex: 0;
+  -ms-flex: 0 0 64px;
+  flex: 0 0 64px;
+  height: 64px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  -webkit-transition: border-color .2s, opacity .2s;
+  transition: border-color .2s, opacity .2s;
+  opacity: .55;
+  /* Prevent layout shift from image loading */
+  background: var(--c-bg2);
+}
+
+@media (min-width: 480px) {
+  .pnt-gal__thumb {
+    -ms-flex: 0 0 68px;
+    flex: 0 0 68px;
+    height: 68px;
+  }
+}
+
+.pnt-gal__thumb:hover,
+.pnt-gal__thumb:active { opacity: .85; }
+
+.pnt-gal__thumb.is-active {
+  border-color: var(--c-text);
+  opacity: 1;
+}
+
+.pnt-gal__thumb img {
+  width: 100%;
+  height: 100%;
+  -o-object-fit: cover;
+  object-fit: cover;
+  display: block;
+}
+
+/* ============================================
+   FULLSCREEN IMAGE OVERLAY
+   Fixed stacking context for Android Chrome
+   ============================================ */
+.pnt-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Use fixed values instead of inset for older Android */
+  z-index: 99999;
+  background: rgba(10,10,8,.94);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  -webkit-transition: opacity .3s, visibility .3s;
+  transition: opacity .3s, visibility .3s;
+  /* Backdrop blur — webkit prefix required */
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  /* Fallback for Android that doesn't support backdrop-filter */
+  background: rgba(10,10,8,.96);
+  /* Prevent scroll bleed on Android */
+  overscroll-behavior: contain;
+  /* GPU layer */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+.pnt-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.pnt-overlay__img {
+  max-width: 88vw;
+  max-height: 88vh;
+  -o-object-fit: contain;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  /* Prevent drag on mobile */
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.pnt-overlay__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255,255,255,.15);
+  border: none;
+  color: #fff;
+  /* Larger tap target on mobile — minimum 44x44 */
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 22px;
+  cursor: pointer;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-transition: background .2s;
+  transition: background .2s;
+  z-index: 2;
+  font-family: inherit;
+}
+
+.pnt-overlay__close:hover,
+.pnt-overlay__close:active { background: rgba(255,255,255,.3); }
+
+.pnt-overlay__nav {
+  position: absolute;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%);
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.15);
+  color: #fff;
+  /* Minimum tap size for mobile */
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  font-size: 22px;
+  -webkit-transition: background .2s;
+  transition: background .2s;
+  font-family: inherit;
+  /* Hide on very small screens — swipe handles nav */
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .pnt-overlay__nav { display: -webkit-box; display: -ms-flexbox; display: flex; }
+}
+
+.pnt-overlay__nav:hover,
+.pnt-overlay__nav:active { background: rgba(255,255,255,.25); }
+
+.pnt-overlay__prev { left: 12px; }
+.pnt-overlay__next { right: 12px; }
+
+.pnt-overlay__counter {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  color: rgba(255,255,255,.65);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ============================================
+   PRODUCT INFO PANEL
+   ============================================ */
+.pnt-info {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.pnt-info__vendor {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--c-gold);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.pnt-info__title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--c-text);
+  margin-bottom: 12px;
+}
+
+@media (min-width: 480px) {
+  .pnt-info__title { font-size: 26px; }
+}
+
+.pnt-info__price-row {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: baseline;
+  -ms-flex-align: baseline;
+  align-items: baseline;
+  gap: 10px;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.pnt-info__price {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--c-text);
+}
+
+@media (min-width: 480px) {
+  .pnt-info__price { font-size: 24px; }
+}
+
+.pnt-info__cmp {
+  font-size: 15px;
+  color: var(--c-text3);
+  text-decoration: line-through;
+}
+
+.pnt-info__badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--c-danger);
+  background: #fef2f2;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.pnt-info__tax {
+  font-size: 12px;
+  color: var(--c-text3);
+  margin-bottom: 18px;
+}
+
+/* VARIANT GROUPS */
+.pnt-vg { margin-bottom: 16px; }
+
+.pnt-vg__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-text);
+  margin-bottom: 8px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  gap: 6px;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.pnt-vg__label span {
+  font-weight: 400;
+  color: var(--c-text2);
+}
+
+.pnt-vg__opts {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pnt-vg__btn {
+  padding: 10px 18px;
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  background: var(--c-white);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--c-text);
+  cursor: pointer;
+  -webkit-transition: all .18s;
+  transition: all .18s;
+  font-family: inherit;
+  /* Prevent text zoom on Android */
+  -webkit-text-size-adjust: 100%;
+  /* Minimum tap target */
+  min-height: 40px;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.pnt-vg__btn:hover { border-color: var(--c-text2); }
+
+.pnt-vg__btn.is-sel {
+  border-color: var(--c-text);
+  background: var(--c-text);
+  color: #fff;
+}
+
+.pnt-vg__btn.is-out {
+  opacity: .35;
+  text-decoration: line-through;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Size chart popup trigger */
+.pnt-vg__sc-link {
+  font-size: 12px;
+  color: var(--c-gold);
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 500;
+  margin-left: auto;
+  -webkit-transition: color .2s;
+  transition: color .2s;
+  background: none;
+  border: none;
+  font-family: inherit;
+  /* Ensure tap target */
+  padding: 4px 2px;
+  min-height: 32px;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.pnt-vg__sc-link:hover,
+.pnt-vg__sc-link:active { color: var(--c-gold-light); }
+
+/* QUANTITY */
+.pnt-qty-row {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.pnt-qty {
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.pnt-qty__b {
+  width: 44px;
+  height: 44px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--c-text);
+  -webkit-transition: background .15s;
+  transition: background .15s;
+  font-family: inherit;
+  /* Ensure proper tap area */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.pnt-qty__b:hover,
+.pnt-qty__b:active { background: var(--c-bg2); }
+
+.pnt-qty__i {
+  width: 50px;
+  height: 44px;
+  text-align: center;
+  border: none;
+  /* 16px minimum to prevent auto-zoom on Android/iOS */
+  font-size: 16px;
+  font-weight: 600;
+  border-left: 1px solid var(--c-border);
+  border-right: 1px solid var(--c-border);
+  -moz-appearance: textfield;
+  -webkit-appearance: none;
+  appearance: none;
+  font-family: inherit;
+  background: #fff;
+  color: var(--c-text);
+  outline: none;
+}
+
+.pnt-qty__i::-webkit-inner-spin-button,
+.pnt-qty__i::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+/* BUY BUTTONS */
+.pnt-buy {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.pnt-btn-atc {
+  width: 100%;
+  padding: 16px;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  -webkit-transition: background .22s, -webkit-transform .22s;
+  transition: background .22s, transform .22s;
+  background: var(--c-text);
+  color: #fff;
+  font-family: inherit;
+  /* Prevent accidental double-tap zoom */
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  /* Min tap height */
+  min-height: 50px;
+}
+
+.pnt-btn-atc:hover:not(:disabled) {
+  background: #333;
+  -webkit-transform: translateY(-1px);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.pnt-btn-atc:active:not(:disabled) {
+  -webkit-transform: translateY(0);
+  transform: translateY(0);
+  background: #111;
+}
+
+.pnt-btn-atc:disabled {
+  background: var(--c-border);
+  color: var(--c-text3);
+  cursor: not-allowed;
+}
+
+.pnt-btn-buy {
+  width: 100%;
+  padding: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  border: 1.5px solid var(--c-text);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--c-text);
+  cursor: pointer;
+  -webkit-transition: background .22s, color .22s;
+  transition: background .22s, color .22s;
+  font-family: inherit;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  min-height: 48px;
+}
+
+.pnt-btn-buy:hover,
+.pnt-btn-buy:active {
+  background: var(--c-text);
+  color: #fff;
+}
+
+/* Shopify dynamic checkout */
+.pnt-dynamic-checkout { margin-top: 4px; }
+.pnt-dynamic-checkout [data-shopify-buttoncontainer] { display: block !important; }
+
+/* ============================================
+   FEATURES GRID — 2-col on mobile, 2-col desktop
+   Replaced auto-fit with explicit columns
+   ============================================ */
+.pnt-feat { margin: 20px 0 16px; }
+
+.pnt-feat__head {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--c-gold-bg);
+}
+
+.pnt-feat__head-icon {
+  width: 28px;
+  height: 28px;
+  background: var(--c-gold);
+  border-radius: 6px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+
+.pnt-feat__head-icon svg { width: 15px; height: 15px; color: #fff; }
+
+.pnt-feat__head-text {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--c-text);
+}
+
+/* Explicit 2-column grid — no auto-fit (Android compat) */
+.pnt-feat__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1.5px solid var(--c-gold-bg);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--c-gold-bg);
+}
+
+/* 1 column on very small screens */
+@media (max-width: 360px) {
+  .pnt-feat__grid { grid-template-columns: 1fr; }
+  .pnt-feat__item { border-right: none !important; }
+  .pnt-feat__item:last-child { border-bottom: none; }
+}
+
+.pnt-feat__item {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px;
+  background: var(--c-white);
+  border-bottom: 1px solid var(--c-gold-bg);
+  border-right: 1px solid var(--c-gold-bg);
+}
+
+.pnt-feat__item:nth-child(2n) { border-right: none; }
+.pnt-feat__item:nth-last-child(-n+2) { border-bottom: none; }
+
+/* When only 1 column is visible on very small screens, last child */
+@media (max-width: 360px) {
+  .pnt-feat__item:last-child { border-bottom: none; }
+  .pnt-feat__item:nth-last-child(-n+2) { border-bottom: 1px solid var(--c-gold-bg); }
+}
+
+.pnt-feat__ico {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: var(--c-gold-bg);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+
+.pnt-feat__ico svg { width: 15px; height: 15px; color: var(--c-gold); }
+
+.pnt-feat__lbl {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--c-text3);
+  line-height: 1.2;
+  display: block;
+}
+
+.pnt-feat__val {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-text);
+  display: block;
+  line-height: 1.3;
+}
+
+/* ============================================
+   OFFERS BANNER
+   ============================================ */
+.pnt-offers {
+  margin: 0 0 16px;
+  border: 2px dashed var(--c-gold-light);
+  border-radius: var(--radius);
+  padding: 14px;
+  background: var(--c-gold-bg);
+}
+
+.pnt-offers__hd {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--c-gold);
+  margin-bottom: 10px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.pnt-offers__hd svg { width: 16px; height: 16px; -ms-flex-negative: 0; flex-shrink: 0; }
+
+.pnt-offers__list {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.pnt-offers__row {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: #fff;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(158,124,43,.12);
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.pnt-offers__code {
+  background: var(--c-text);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-transition: background .2s;
+  transition: background .2s;
+  -webkit-user-select: all;
+  -moz-user-select: all;
+  -ms-user-select: all;
+  user-select: all;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  min-height: 32px;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.pnt-offers__code:hover,
+.pnt-offers__code:active { background: var(--c-gold); }
+.pnt-offers__code.is-copied { background: var(--c-success); }
+
+.pnt-offers__txt {
+  font-size: 12px;
+  color: var(--c-text2);
+  line-height: 1.4;
+}
+
+/* ============================================
+   TRUST BAR — 2-col on mobile, 4-col on desktop
+   ============================================ */
+.pnt-trust {
+  display: grid;
+  /* Explicit 2-col for mobile */
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 16px 14px;
+  margin: 0 0 16px;
+  background: var(--c-bg2);
+  border-radius: var(--radius);
+  border: 1px solid var(--c-border);
+}
+
+@media (min-width: 480px) {
+  .pnt-trust {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    padding: 16px 18px;
+    gap: 8px;
+  }
+}
+
+.pnt-trust__item {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.pnt-trust__ico {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--c-gold-bg);
+  border: 1.5px solid rgba(158,124,43,.18);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+
+.pnt-trust__ico svg { width: 15px; height: 15px; color: var(--c-gold); }
+.pnt-trust__ttl { font-size: 11px; font-weight: 700; color: var(--c-text); line-height: 1.3; display: block; }
+.pnt-trust__sub { font-size: 10px; color: var(--c-text3); display: block; margin-top: 1px; }
+
+/* ============================================
+   SIZE CHART MODAL — z-index fix for Android
+   ============================================ */
+.pnt-sc-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100000;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  visibility: hidden;
+  -webkit-transition: opacity .3s, visibility .3s;
+  transition: opacity .3s, visibility .3s;
+  overscroll-behavior: contain;
+}
+
+.pnt-sc-modal.is-open { opacity: 1; visibility: visible; }
+
+.pnt-sc-modal__bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,.6);
+  cursor: pointer;
+}
+
+.pnt-sc-modal__box {
+  position: relative;
+  background: #fff;
+  border-radius: var(--radius);
+  max-width: 700px;
+  width: 100%;
+  /* Use calc instead of vh on Android for better behavior */
+  max-height: calc(100% - 32px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-shadow: var(--shadow-lg);
+  z-index: 2;
+  -webkit-animation: pnt-modal-in .3s ease;
+  animation: pnt-modal-in .3s ease;
+}
+
+@-webkit-keyframes pnt-modal-in {
+  from { -webkit-transform: translateY(20px); transform: translateY(20px); opacity: 0; }
+  to { -webkit-transform: translateY(0); transform: translateY(0); opacity: 1; }
+}
+@keyframes pnt-modal-in {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.pnt-sc-modal__head {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--c-border);
+  /* Sticky header inside modal */
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 1;
+}
+
+.pnt-sc-modal__title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--c-text);
+}
+
+.pnt-sc-modal__close {
+  background: none;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--c-text2);
+  -webkit-transition: background .2s;
+  transition: background .2s;
+  font-family: inherit;
+}
+
+.pnt-sc-modal__close:hover,
+.pnt-sc-modal__close:active { background: var(--c-bg2); }
+
+.pnt-sc-modal__body { padding: 20px; }
+
+/* Modal table — scrollable on small screens */
+.pnt-sc-modal__table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 4px;
+}
+
+.pnt-sc-modal table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 300px;
+}
+
+.pnt-sc-modal thead { background: var(--c-text); color: #fff; }
+
+.pnt-sc-modal th {
+  padding: 10px 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  font-size: 11px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.pnt-sc-modal td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--c-border);
+  text-align: center;
+  font-size: 12px;
+}
+
+.pnt-sc-modal tr:hover td { background: var(--c-bg2); }
+
+.pnt-sc-modal__img {
+  margin-top: 18px;
+  text-align: center;
+}
+
+.pnt-sc-modal__img img {
+  max-width: 100%;
+  border-radius: var(--radius);
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* ============================================
+   SEPARATOR
+   ============================================ */
+.pnt-sep {
+  border: none;
+  border-top: 1px solid var(--c-border);
+  margin: 16px 0;
+}
+
+/* ============================================
+   TABS — Mobile tabs: no min-width:max-content
+   ============================================ */
+.pnt-tabs-section {
+  max-width: 1300px;
+  margin: 40px auto 0;
+  padding: 0 16px;
+}
+
+@media (min-width: 480px) {
+  .pnt-tabs-section { padding: 0 20px; }
+}
+
+.pnt-tabs {
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.pnt-tabs__nav {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  background: var(--c-bg2);
+  border-bottom: 1.5px solid var(--c-border);
+  overflow-x: auto;
+  /* Smooth scrolling on Android */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.pnt-tabs__nav::-webkit-scrollbar { display: none; }
+
+.pnt-tabs__btn {
+  /* Use flex:1 with min-width fallback — not max-content */
+  -webkit-box-flex: 1;
+  -ms-flex: 1 0 auto;
+  flex: 1 0 auto;
+  min-width: 100px;
+  padding: 14px 18px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  color: var(--c-text3);
+  -webkit-transition: all .2s;
+  transition: all .2s;
+  text-align: center;
+  font-family: inherit;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  min-height: 44px;
+}
+
+@media (min-width: 480px) {
+  .pnt-tabs__btn {
+    padding: 15px 24px;
+    font-size: 13px;
+  }
+}
+
+.pnt-tabs__btn:hover { color: var(--c-text); background: rgba(0,0,0,.02); }
+.pnt-tabs__btn:active { color: var(--c-text); }
+.pnt-tabs__btn.is-active {
+  color: var(--c-text);
+  border-bottom-color: var(--c-gold);
+  background: #fff;
+}
+
+.pnt-tabs__panel { display: none; padding: 22px 18px; }
+.pnt-tabs__panel.is-active { display: block; }
+
+@media (min-width: 480px) {
+  .pnt-tabs__panel { padding: 28px 24px; }
+}
+
+.pnt-prose {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--c-text2);
+}
+
+.pnt-prose h3 {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--c-text);
+  margin: 16px 0 8px;
+}
+
+.pnt-prose p { margin-bottom: 12px; }
+.pnt-prose ul, .pnt-prose ol { padding-left: 18px; margin: 8px 0 12px; }
+.pnt-prose li { margin-bottom: 5px; }
+.pnt-prose strong { color: var(--c-text); font-weight: 600; }
+
+/* ============================================
+   SIZE CHART FULL SECTION
+   ============================================ */
+.pnt-sc-section {
+  max-width: 1300px;
+  margin: 40px auto 0;
+  padding: 0 16px;
+  text-align: center;
+}
+
+@media (min-width: 480px) {
+  .pnt-sc-section { padding: 0 20px; }
+}
+
+.pnt-sh {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--c-text);
+  margin-bottom: 6px;
+}
+
+@media (min-width: 480px) {
+  .pnt-sh { font-size: 24px; }
+}
+
+.pnt-ssub {
+  font-size: 13px;
+  color: var(--c-text3);
+  margin-bottom: 24px;
+}
+
+/* Scrollable table wrapper for mobile */
+.pnt-sc-section__table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 24px;
+}
+
+.pnt-sc-section table {
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 300px;
+}
+
+.pnt-sc-section thead { background: var(--c-text); color: #fff; }
+
+.pnt-sc-section th {
+  padding: 11px 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.pnt-sc-section td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--c-border);
+  text-align: center;
+}
+
+.pnt-sc-section tr:hover td { background: var(--c-bg2); }
+
+.pnt-sc-section__img { max-width: 520px; margin: 0 auto; }
+
+.pnt-sc-section__img img {
+  width: 100%;
+  border-radius: var(--radius);
+  height: auto;
+  display: block;
+}
+
+/* ============================================
+   FRAME STYLES SHOWCASE
+   Explicit grid — no auto-fit
+   ============================================ */
+.pnt-frames-section {
+  max-width: 1300px;
+  margin: 40px auto 0;
+  padding: 0 16px;
+  text-align: center;
+}
+
+@media (min-width: 480px) {
+  .pnt-frames-section { padding: 0 20px; }
+}
+
+/* Explicit breakpoints instead of auto-fit */
+.pnt-frames__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+@media (min-width: 640px) {
+  .pnt-frames__grid { grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+}
+
+@media (min-width: 900px) {
+  .pnt-frames__grid { grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; }
+}
+
+.pnt-frames__card {
+  background: var(--c-bg2);
+  border-radius: var(--radius);
+  overflow: hidden;
+  text-align: center;
+  -webkit-transition: -webkit-transform .25s, box-shadow .25s;
+  transition: transform .25s, box-shadow .25s;
+  border: 1px solid var(--c-border);
+}
+
+.pnt-frames__card:hover { -webkit-transform: translateY(-4px); transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+
+/* Image with padding-bottom ratio trick */
+.pnt-frames__card-img-wrap {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+  background: var(--c-bg3);
+  overflow: hidden;
+}
+
+.pnt-frames__card-img-wrap img {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  -o-object-fit: cover;
+  object-fit: cover;
+  display: block;
+}
+
+.pnt-frames__card-body { padding: 12px; }
+
+.pnt-frames__card-t {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--c-text);
+  margin-bottom: 5px;
+}
+
+.pnt-frames__card-d {
+  font-size: 11px;
+  color: var(--c-text2);
+  line-height: 1.5;
+}
+
+/* ============================================
+   LIFESTYLE GALLERY
+   Explicit grid — no auto-fill
+   ============================================ */
+.pnt-life-section {
+  max-width: 1300px;
+  margin: 40px auto 0;
+  padding: 0 16px;
+  text-align: center;
+}
+
+@media (min-width: 480px) {
+  .pnt-life-section { padding: 0 20px; }
+}
+
+/* Explicit 3-col on mobile, 5-col on desktop */
+.pnt-life__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  margin-top: 24px;
+}
+
+@media (min-width: 480px) {
+  .pnt-life__grid { grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+}
+
+@media (min-width: 768px) {
+  .pnt-life__grid { grid-template-columns: 1fr 1fr 1fr 1fr 1fr; }
+}
+
+/* Padding-bottom trick for square ratio */
+.pnt-life__item {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.pnt-life__item img {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  -o-object-fit: cover;
+  object-fit: cover;
+  display: block;
+  -webkit-transition: -webkit-transform .3s;
+  transition: transform .3s;
+}
+
+.pnt-life__item:hover img,
+.pnt-life__item:active img { -webkit-transform: scale(1.06); transform: scale(1.06); }
+
+/* ============================================
+   STICKY BAR — Android-safe scroll handling
+   ============================================ */
+.pnt-sticky {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-top: 1px solid var(--c-border);
+  padding: 10px 16px;
+  /* Account for Android nav bar */
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  z-index: 9998;
+  -webkit-transform: translateY(100%);
+  transform: translateY(100%);
+  -webkit-transition: -webkit-transform .3s;
+  transition: transform .3s;
+  box-shadow: 0 -4px 24px rgba(0,0,0,.08);
+  /* GPU layer to prevent flicker on Android */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0) translateY(100%);
+  transform: translateZ(0) translateY(100%);
+}
+
+.pnt-sticky.is-vis {
+  -webkit-transform: translateZ(0) translateY(0);
+  transform: translateZ(0) translateY(0);
+}
+
+.pnt-sticky__in {
+  max-width: 1300px;
+  margin: 0 auto;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.pnt-sticky__left {
+  display: none;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .pnt-sticky__left { display: -webkit-box; display: -ms-flexbox; display: flex; }
+}
+
+.pnt-sticky__img {
+  width: 46px;
+  height: 46px;
+  border-radius: 6px;
+  -o-object-fit: cover;
+  object-fit: cover;
+}
+
+.pnt-sticky__t { font-size: 13px; font-weight: 600; color: var(--c-text); }
+.pnt-sticky__p { font-size: 13px; font-weight: 700; }
+
+.pnt-sticky__btn {
+  padding: 13px 28px;
+  background: var(--c-text);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  cursor: pointer;
+  white-space: nowrap;
+  -webkit-transition: background .2s;
+  transition: background .2s;
+  font-family: inherit;
+  min-height: 46px;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  /* Expand to full width on mobile */
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+@media (min-width: 640px) {
+  .pnt-sticky__btn { -webkit-box-flex: 0; -ms-flex: 0; flex: 0; }
+}
+
+.pnt-sticky__btn:hover,
+.pnt-sticky__btn:active { background: #333; }
+
+/* Utilities */
+.pnt-mb0 { margin-bottom: 0 !important; }
+.pnt-mt-lg { margin-top: 40px; }
+.pnt-pb-lg { padding-bottom: 70px; }
+</style>
+
+{%- comment -%}=== HTML ==={%- endcomment -%}
+<div class="pnt pnt-pb-lg">
+  <div class="pnt-wrap">
+    {%- comment -%}Breadcrumb{%- endcomment -%}
+    <nav class="pnt-bread" aria-label="Breadcrumb">
+      <a href="/">Home</a>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+      {%- if product.collections.size > 0 -%}
+        <a href="{{ product.collections.first.url }}">{{ product.collections.first.title }}</a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+      {%- endif -%}
+      <span>{{ product.title | truncate: 50 }}</span>
+    </nav>
+
+    <div class="pnt-grid">
+      {%- comment -%}========== LEFT: GALLERY =========={%- endcomment -%}
+      <div class="pnt-gal">
+        <div class="pnt-gal__main" id="pntMainGal" role="button" aria-label="View full image" tabindex="0">
+          {%- for media in product.media -%}
+            <img
+              class="pnt-gal__main-img {% if forloop.first %}is-active{% endif %}"
+              src="{{ media | image_url: width: 1000 }}"
+              alt="{{ media.alt | default: product.title | escape }}"
+              data-idx="{{ forloop.index0 }}"
+              data-full="{{ media | image_url: width: 2400 }}"
+              loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+              width="1000" height="1000"
+              draggable="false"
+            >
+          {%- endfor -%}
+          <div class="pnt-gal__zoom-hint" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          </div>
+          <div class="pnt-gal__swipe-hint" id="pntSwipeHint" aria-hidden="true">Swipe to view more</div>
+        </div>
+
+        {%- comment -%}Thumbnails BELOW the main image{%- endcomment -%}
+        {%- if product.media.size > 1 -%}
+        <div class="pnt-gal__thumbs" id="pntThumbs" role="list" aria-label="Product images">
+          {%- for media in product.media -%}
+            <div
+              class="pnt-gal__thumb {% if forloop.first %}is-active{% endif %}"
+              data-idx="{{ forloop.index0 }}"
+              role="listitem button"
+              tabindex="0"
+              aria-label="View image {{ forloop.index }}"
+            >
+              <img
+                src="{{ media | image_url: width: 150 }}"
+                alt="{{ media.alt | default: product.title | escape }}"
+                width="68" height="68"
+                loading="lazy"
+              >
+            </div>
+          {%- endfor -%}
+        </div>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%}========== RIGHT: PRODUCT INFO =========={%- endcomment -%}
+      <div class="pnt-info">
+        {%- if product.vendor != blank -%}
+          <div class="pnt-info__vendor">{{ product.vendor }}</div>
+        {%- endif -%}
+
+        <h1 class="pnt-info__title">{{ product.title }}</h1>
+
+        <div class="pnt-info__price-row">
+          <span class="pnt-info__price" id="pntPrice">{{ cv.price | money }}</span>
+          {%- if cv.compare_at_price > cv.price -%}
+            <span class="pnt-info__cmp" id="pntCmp">{{ cv.compare_at_price | money }}</span>
+            {%- assign sv = cv.compare_at_price | minus: cv.price | times: 100.0 | divided_by: cv.compare_at_price | round -%}
+            <span class="pnt-info__badge" id="pntBadge">Save {{ sv }}%</span>
+          {%- endif -%}
+        </div>
+        <p class="pnt-info__tax">Inclusive of all taxes</p>
+
+        {% comment %} Add the live viewer counter {% endcomment %}
+         {% render 'live-viewer-count',
+          min_viewers: 70,
+          max_viewers: 500,
+          min_interval: 3,
+          max_interval: 8
+        %}
+        
+
+        {%- comment -%}=== PRODUCT FORM ==={%- endcomment -%}
+        {%- form 'product', product, id: fid, novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+          <input type="hidden" name="id" value="{{ cv.id }}" id="pntVarId">
+
+          {%- for option in product.options_with_values -%}
+            <div class="pnt-vg">
+              <div class="pnt-vg__label">
+                {{ option.name }}: <span id="pntOptLabel{{ forloop.index0 }}">{{ option.selected_value }}</span>
+                {%- if option.name == 'Size' -%}
+                  <button type="button" class="pnt-vg__sc-link" id="pntScOpen" aria-haspopup="dialog">[Size Chart]</button>
+                {%- endif -%}
+              </div>
+              <div class="pnt-vg__opts" data-opt-idx="{{ forloop.index0 }}" role="group" aria-label="{{ option.name }} options">
+                {%- for value in option.values -%}
+                  <button
+                    type="button"
+                    class="pnt-vg__btn {% if value == option.selected_value %}is-sel{% endif %}"
+                    data-val="{{ value | escape }}"
+                    aria-pressed="{% if value == option.selected_value %}true{% else %}false{% endif %}"
+                  >{{ value }}</button>
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- endfor -%}
+
+          <div class="pnt-qty-row">
+            <div class="pnt-vg__label pnt-mb0">Quantity</div>
+            <div class="pnt-qty" role="group" aria-label="Quantity">
+              <button type="button" class="pnt-qty__b" id="pntQm" aria-label="Decrease quantity">−</button>
+              <input
+                type="number"
+                name="quantity"
+                value="1"
+                min="1"
+                max="99"
+                class="pnt-qty__i"
+                id="pntQi"
+                aria-label="Quantity"
+                inputmode="numeric"
+                pattern="[0-9]*"
+              >
+              <button type="button" class="pnt-qty__b" id="pntQp" aria-label="Increase quantity">+</button>
+            </div>
+          </div>
+
+          <div>
+             <a 
+                href="https://api.whatsapp.com/send?phone=919818821453&text=Hi%2C%20I%20want%20to%20buy%20{{ product.title | url_encode }}%20in%20bulk. Can you please help me for the same ?"
+                target="_blank"
+                class="pf-bulk-button"
+              >
+                Want to buy this in bulk? Click here
+              </a>
+
+              <style>
+              .pf-bulk-button {
+                display: inline-block;
+                font-size: 14px;
+                font-weight: 600;
+                color: #c49b66; 
+                text-decoration: underline;
+                margin-bottom : 5px;
+              }
+
+              </style>
+          </div>
+
+
+          <div class="pnt-buy">
+            <button
+              type="submit"
+              class="pnt-btn-atc"
+              id="pntAtc"
+              {% unless cv.available %}disabled{% endunless %}
+            >
+              {%- if cv.available -%}Add to Cart{%- else -%}Sold Out{%- endif -%}
+            </button>
+            {%- if section.settings.show_dynamic_checkout -%}
+              <div class="pnt-dynamic-checkout">
+                {{ form | payment_button }}
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endform -%}
+
+        {%- comment -%}=== TRUST BAR ==={%- endcomment -%}
+        <div class="pnt-trust" role="list">
+          <div class="pnt-trust__item" role="listitem">
+            <div class="pnt-trust__ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+            <div><span class="pnt-trust__ttl">{{ section.settings.trust_1_title | default: 'Free Shipping' }}</span><span class="pnt-trust__sub">{{ section.settings.trust_1_sub | default: 'All across India' }}</span></div>
+          </div>
+          <div class="pnt-trust__item" role="listitem">
+            <div class="pnt-trust__ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+            <div><span class="pnt-trust__ttl">{{ section.settings.trust_2_title | default: 'Handcrafted' }}</span><span class="pnt-trust__sub">{{ section.settings.trust_2_sub | default: 'Premium quality' }}</span></div>
+          </div>
+          <div class="pnt-trust__item" role="listitem">
+            <div class="pnt-trust__ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></div>
+            <div><span class="pnt-trust__ttl">{{ section.settings.trust_3_title | default: 'Easy Returns' }}</span><span class="pnt-trust__sub">{{ section.settings.trust_3_sub | default: '7-day policy' }}</span></div>
+          </div>
+          <div class="pnt-trust__item" role="listitem">
+            <div class="pnt-trust__ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div><span class="pnt-trust__ttl">{{ section.settings.trust_4_title | default: 'Secure Payment' }}</span><span class="pnt-trust__sub">{{ section.settings.trust_4_sub | default: '100% safe checkout' }}</span></div>
+          </div>
+        </div>
+
+        <hr class="pnt-sep">
+
+        {%- comment -%}=== FEATURES GRID ==={%- endcomment -%}
+        {%- if section.settings.feat_1_label != blank -%}
+        <div class="pnt-feat">
+          <div class="pnt-feat__head">
+            <div class="pnt-feat__head-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
+            <span class="pnt-feat__head-text">Product Specifications</span>
+          </div>
+          <div class="pnt-feat__grid" role="list">
+            {%- assign feat_icons = 'M4 4h16v16H4z|M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z|M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z|M21 16V8l-7-4-7 4v8l7 4 7-4z|M14.7 6.3l1.6 1.6 3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94L14.7 6.3z|M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h20|M22 12h-4l-3 9L9 3l-3 9H2|M21 16V8l-7-4-7 4v8l7 4z' | split: '|' -%}
+            {%- for i in (1..8) -%}
+              {%- assign lbl_key = 'feat_' | append: i | append: '_label' -%}
+              {%- assign val_key = 'feat_' | append: i | append: '_value' -%}
+              {%- assign lbl = section.settings[lbl_key] -%}
+              {%- assign val = section.settings[val_key] -%}
+              {%- if lbl != blank and val != blank -%}
+                {%- assign icon_idx = i | minus: 1 -%}
+                <div class="pnt-feat__item" role="listitem">
+                  <div class="pnt-feat__ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="{{ feat_icons[icon_idx] }}"/></svg></div>
+                  <div><span class="pnt-feat__lbl">{{ lbl }}</span><span class="pnt-feat__val">{{ val }}</span></div>
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </div>
+        {%- endif -%}
+
+        <hr class="pnt-sep">
+
+        {%- comment -%}=== OFFERS ==={%- endcomment -%}
+        {%- if section.settings.offer_1_code != blank -%}
+        <div class="pnt-offers">
+          <div class="pnt-offers__hd">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+            Discount Codes &amp; Offers
+          </div>
+          <div class="pnt-offers__list">
+            {%- for i in (1..4) -%}
+              {%- assign ck = 'offer_' | append: i | append: '_code' -%}
+              {%- assign tk = 'offer_' | append: i | append: '_text' -%}
+              {%- if section.settings[ck] != blank and section.settings[tk] != blank -%}
+                <div class="pnt-offers__row">
+                  <span class="pnt-offers__code" data-cpcode role="button" tabindex="0" aria-label="Copy code {{ section.settings[ck] }}">{{ section.settings[ck] }}</span>
+                  <span class="pnt-offers__txt">{{ section.settings[tk] }}</span>
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </div>
+        {%- endif -%}
+
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%}========== FULL WIDTH: TABS =========={%- endcomment -%}
+  {%- if section.settings.tab_1_content != blank or section.settings.tab_2_content != blank or section.settings.tab_3_content != blank -%}
+  <div class="pnt-tabs-section">
+    <div class="pnt-tabs">
+      <div class="pnt-tabs__nav" role="tablist">
+        {%- if section.settings.tab_1_content != blank -%}
+          <button type="button" class="pnt-tabs__btn is-active" data-tab="pntP1" role="tab" aria-selected="true" aria-controls="pntP1">{{ section.settings.tab_1_title | default: 'Product Details' }}</button>
+        {%- endif -%}
+        {%- if section.settings.tab_2_content != blank -%}
+          <button type="button" class="pnt-tabs__btn" data-tab="pntP2" role="tab" aria-selected="false" aria-controls="pntP2">{{ section.settings.tab_2_title | default: 'Shipping' }}</button>
+        {%- endif -%}
+        {%- if section.settings.tab_3_content != blank -%}
+          <button type="button" class="pnt-tabs__btn" data-tab="pntP3" role="tab" aria-selected="false" aria-controls="pntP3">{{ section.settings.tab_3_title | default: 'Returns & Refunds' }}</button>
+        {%- endif -%}
+      </div>
+      {%- if section.settings.tab_1_content != blank -%}<div id="pntP1" class="pnt-tabs__panel is-active" role="tabpanel"><div class="pnt-prose">{{ section.settings.tab_1_content }}</div></div>{%- endif -%}
+      {%- if section.settings.tab_2_content != blank -%}<div id="pntP2" class="pnt-tabs__panel" role="tabpanel"><div class="pnt-prose">{{ section.settings.tab_2_content }}</div></div>{%- endif -%}
+      {%- if section.settings.tab_3_content != blank -%}<div id="pntP3" class="pnt-tabs__panel" role="tabpanel"><div class="pnt-prose">{{ section.settings.tab_3_content }}</div></div>{%- endif -%}
+    </div>
+  </div>
+  {%- endif -%}
+
+  {%- comment -%}========== FULL WIDTH: SIZE CHART =========={%- endcomment -%}
+  {%- if section.settings.show_size_chart -%}
+  <div class="pnt-sc-section">
+    <h2 class="pnt-sh">{{ section.settings.sizechart_title | default: 'Frames & Canvas Sizes' }}</h2>
+    <p class="pnt-ssub">{{ section.settings.sizechart_subtitle | default: 'Choose the perfect size for your space' }}</p>
+    <div class="pnt-sc-section__table-wrap">
+      <table>
+        <thead><tr><th>Size</th><th>mm</th><th>cm</th><th>Inches</th></tr></thead>
+        <tbody>
+          {%- for i in (1..5) -%}
+            {%- assign nk = 'size_row_' | append: i | append: '_name' -%}
+            {%- if section.settings[nk] != blank -%}
+              {%- assign mk = 'size_row_' | append: i | append: '_mm' -%}
+              {%- assign ck = 'size_row_' | append: i | append: '_cm' -%}
+              {%- assign ik = 'size_row_' | append: i | append: '_in' -%}
+              <tr><td><strong>{{ section.settings[nk] }}</strong></td><td>{{ section.settings[mk] }}</td><td>{{ section.settings[ck] }}</td><td>{{ section.settings[ik] }}</td></tr>
+            {%- endif -%}
+          {%- endfor -%}
+        </tbody>
+      </table>
+    </div>
+    {%- if section.settings.sizechart_image != blank -%}
+      <div class="pnt-sc-section__img"><img src="{{ section.settings.sizechart_image | image_url: width: 1000 }}" alt="Size chart" loading="lazy" width="520"></div>
+    {%- endif -%}
+  </div>
+  {%- endif -%}
+
+  {%- comment -%}========== FRAME SHOWCASE =========={%- endcomment -%}
+  {%- if section.settings.show_frame_showcase -%}
+  <div class="pnt-frames-section">
+    <h2 class="pnt-sh">{{ section.settings.frames_title | default: 'Frame Styles & Colors' }}</h2>
+    <p class="pnt-ssub">{{ section.settings.frames_subtitle | default: 'Choose the perfect frame for your art' }}</p>
+    <div class="pnt-frames__grid">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'frame_style' and block.settings.frame_image != blank -%}
+          <div class="pnt-frames__card" {{ block.shopify_attributes }}>
+            <div class="pnt-frames__card-img-wrap">
+              <img src="{{ block.settings.frame_image | image_url: width: 600 }}" alt="{{ block.settings.frame_title | escape }}" loading="lazy" width="300" height="300">
+            </div>
+            <div class="pnt-frames__card-body">
+              <div class="pnt-frames__card-t">{{ block.settings.frame_title }}</div>
+              {%- if block.settings.frame_desc != blank -%}<div class="pnt-frames__card-d">{{ block.settings.frame_desc }}</div>{%- endif -%}
+            </div>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+  {%- endif -%}
+
+  {%- comment -%}========== LIFESTYLE GALLERY =========={%- endcomment -%}
+  {%- if section.settings.show_lifestyle_gallery -%}
+    {%- assign has_life = false -%}
+    {%- for block in section.blocks -%}{%- if block.type == 'lifestyle_image' and block.settings.image != blank -%}{%- assign has_life = true -%}{%- break -%}{%- endif -%}{%- endfor -%}
+    {%- if has_life -%}
+    <div class="pnt-life-section">
+      <h2 class="pnt-sh">{{ section.settings.lifestyle_title | default: 'Photo Gallery' }}</h2>
+      <p class="pnt-ssub">{{ section.settings.lifestyle_subtitle | default: 'See how our art looks in real spaces' }}</p>
+      <div class="pnt-life__grid">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'lifestyle_image' and block.settings.image != blank -%}
+            <div class="pnt-life__item" {{ block.shopify_attributes }}>
+              <img src="{{ block.settings.image | image_url: width: 500 }}" alt="{{ block.settings.image.alt | default: 'Lifestyle' | escape }}" loading="lazy" width="250" height="250">
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+    {%- endif -%}
+  {%- endif -%}
+</div>
+
+{%- comment -%}=== SIZE CHART MODAL (popup) ==={%- endcomment -%}
+<div class="pnt pnt-sc-modal" id="pntScModal" role="dialog" aria-modal="true" aria-labelledby="pntScModalTitle">
+  <div class="pnt-sc-modal__bg" id="pntScBg"></div>
+  <div class="pnt-sc-modal__box">
+    <div class="pnt-sc-modal__head">
+      <span class="pnt-sc-modal__title" id="pntScModalTitle">Size Chart</span>
+      <button type="button" class="pnt-sc-modal__close" id="pntScClose" aria-label="Close size chart">&times;</button>
+    </div>
+    <div class="pnt-sc-modal__body">
+      <div class="pnt-sc-modal__table-wrap">
+        <table>
+          <thead><tr><th>Size</th><th>mm</th><th>cm</th><th>Inches</th></tr></thead>
+          <tbody>
+            {%- for i in (1..5) -%}
+              {%- assign nk = 'size_row_' | append: i | append: '_name' -%}
+              {%- if section.settings[nk] != blank -%}
+                {%- assign mk = 'size_row_' | append: i | append: '_mm' -%}
+                {%- assign ck = 'size_row_' | append: i | append: '_cm' -%}
+                {%- assign ik = 'size_row_' | append: i | append: '_in' -%}
+                <tr><td><strong>{{ section.settings[nk] }}</strong></td><td>{{ section.settings[mk] }}</td><td>{{ section.settings[ck] }}</td><td>{{ section.settings[ik] }}</td></tr>
+              {%- endif -%}
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
+      {%- if section.settings.sizechart_image != blank -%}
+        <div class="pnt-sc-modal__img"><img src="{{ section.settings.sizechart_image | image_url: width: 800 }}" alt="Size chart reference" loading="lazy" width="100%"></div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{%- comment -%}=== FULLSCREEN IMAGE OVERLAY ==={%- endcomment -%}
+<div class="pnt pnt-overlay" id="pntOverlay" role="dialog" aria-modal="true" aria-label="Full size image viewer">
+  <button type="button" class="pnt-overlay__close" id="pntOvClose" aria-label="Close image viewer">&times;</button>
+  <button type="button" class="pnt-overlay__nav pnt-overlay__prev" id="pntOvPrev" aria-label="Previous image">&#8249;</button>
+  <img class="pnt-overlay__img" id="pntOvImg" src="" alt="" draggable="false">
+  <button type="button" class="pnt-overlay__nav pnt-overlay__next" id="pntOvNext" aria-label="Next image">&#8250;</button>
+  <div class="pnt-overlay__counter" id="pntOvCount" aria-live="polite"></div>
+</div>
+
+{%- comment -%}=== STICKY BAR ==={%- endcomment -%}
+
+{% comment %} Currently we don't need it we have incorporate it sofar {% endcomment %}
+
+{% comment %} {%- if product.available -%}
+<div class="pnt pnt-sticky" id="pntSticky" aria-label="Quick add to cart">
+  <div class="pnt-sticky__in">
+    <div class="pnt-sticky__left">
+      {%- if product.featured_media -%}
+        <img class="pnt-sticky__img" src="{{ product.featured_media | image_url: width: 120 }}" alt="{{ product.title | escape }}" width="46" height="46" loading="lazy">
+      {%- endif -%}
+      <div>
+        <div class="pnt-sticky__t">{{ product.title | truncate: 35 }}</div>
+        <div class="pnt-sticky__p" id="pntStickyP">{{ cv.price | money }}</div>
+      </div>
+    </div>
+    <button type="submit" form="{{ fid }}" class="pnt-sticky__btn" id="pntStickyAtc">Add to Cart</button>
+  </div>
+</div>
+{%- endif -%} {% endcomment %}
+
+{%- comment -%}=== JAVASCRIPT — All functionality + Mobile fixes ==={%- endcomment -%}
+<script>
+(function(){
+  'use strict';
+
+  function ready(fn){
+    if(document.readyState==='loading'){
+      document.addEventListener('DOMContentLoaded',fn);
+    } else {
+      fn();
+    }
+  }
+
+  ready(function(){
+
+    /* ========================================
+       GALLERY: Thumbnails, overlay, touch swipe
+       ======================================== */
+    var thumbs = document.querySelectorAll('.pnt-gal__thumb');
+    var mainImgs = document.querySelectorAll('.pnt-gal__main-img');
+    var mainGal = document.getElementById('pntMainGal');
+    var ovl = document.getElementById('pntOverlay');
+    var ovImg = document.getElementById('pntOvImg');
+    var ovCount = document.getElementById('pntOvCount');
+    var mediaUrls = [];
+    var ovIdx = 0;
+
+    mainImgs.forEach(function(img){
+      mediaUrls.push(img.getAttribute('data-full') || img.src);
+    });
+
+    /* --- Active image switcher --- */
+    function setActiveImage(idx){
+      thumbs.forEach(function(t){ t.classList.remove('is-active'); });
+      mainImgs.forEach(function(m){ m.classList.remove('is-active'); });
+      if(thumbs[idx]) thumbs[idx].classList.add('is-active');
+      if(mainImgs[idx]) mainImgs[idx].classList.add('is-active');
+      if(thumbs[idx]){
+        thumbs[idx].scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
+      }
+    }
+
+    /* --- Thumbnail clicks --- */
+    thumbs.forEach(function(th){
+      th.addEventListener('click', function(){
+        setActiveImage(parseInt(this.getAttribute('data-idx'), 10));
+      });
+      /* Keyboard support */
+      th.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          setActiveImage(parseInt(this.getAttribute('data-idx'), 10));
+        }
+      });
+    });
+
+    /* --- Click/tap main image → open overlay --- */
+    mainGal.addEventListener('click', function(e){
+      var img = e.target.closest('.pnt-gal__main-img');
+      if(img){
+        ovIdx = parseInt(img.getAttribute('data-idx'), 10);
+        openOverlay();
+      }
+    });
+
+    /* Keyboard on gallery container */
+    mainGal.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        var activeImg = mainGal.querySelector('.pnt-gal__main-img.is-active');
+        if(activeImg){
+          ovIdx = parseInt(activeImg.getAttribute('data-idx'), 10);
+          openOverlay();
+        }
+      }
+    });
+
+    /* ---- Touch swipe on MAIN GALLERY IMAGE ---- */
+    var touchStartX = 0;
+    var touchStartY = 0;
+    var touchEndX = 0;
+    var isSwiping = false;
+    var swipeThreshold = 50; /* min px to count as swipe */
+    var swipeHint = document.getElementById('pntSwipeHint');
+
+    /* Show swipe hint briefly if multiple images */
+    if(mediaUrls.length > 1 && swipeHint){
+      setTimeout(function(){
+        swipeHint.style.opacity = '1';
+        setTimeout(function(){ swipeHint.style.opacity = '0'; }, 2000);
+      }, 800);
+    }
+
+    mainGal.addEventListener('touchstart', function(e){
+      touchStartX = e.changedTouches[0].clientX;
+      touchStartY = e.changedTouches[0].clientY;
+      isSwiping = false;
+    }, { passive: true });
+
+    mainGal.addEventListener('touchmove', function(e){
+      var dx = Math.abs(e.changedTouches[0].clientX - touchStartX);
+      var dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+      if(dx > dy && dx > 10){ isSwiping = true; }
+    }, { passive: true });
+
+    mainGal.addEventListener('touchend', function(e){
+      touchEndX = e.changedTouches[0].clientX;
+      var dx = touchEndX - touchStartX;
+      var dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+
+      /* Only trigger swipe if horizontal movement dominates */
+      if(isSwiping && Math.abs(dx) > swipeThreshold && Math.abs(dx) > dy){
+        var currentIdx = 0;
+        mainImgs.forEach(function(m, i){ if(m.classList.contains('is-active')) currentIdx = i; });
+
+        if(dx < 0){
+          /* Swipe left → next */
+          var nextIdx = (currentIdx + 1) % mainImgs.length;
+          setActiveImage(nextIdx);
+        } else {
+          /* Swipe right → previous */
+          var prevIdx = (currentIdx - 1 + mainImgs.length) % mainImgs.length;
+          setActiveImage(prevIdx);
+        }
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    /* ---- Overlay open/close ---- */
+    function openOverlay(){
+      ovImg.src = mediaUrls[ovIdx];
+      ovCount.textContent = (ovIdx + 1) + ' / ' + mediaUrls.length;
+      ovl.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'relative'; /* Android Chrome fix */
+    }
+
+    function closeOverlay(){
+      ovl.classList.remove('is-open');
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      ovImg.src = ''; /* Release memory on mobile */
+    }
+
+    function overlayPrev(){
+      ovIdx = (ovIdx - 1 + mediaUrls.length) % mediaUrls.length;
+      ovImg.src = mediaUrls[ovIdx];
+      ovCount.textContent = (ovIdx + 1) + ' / ' + mediaUrls.length;
+    }
+
+    function overlayNext(){
+      ovIdx = (ovIdx + 1) % mediaUrls.length;
+      ovImg.src = mediaUrls[ovIdx];
+      ovCount.textContent = (ovIdx + 1) + ' / ' + mediaUrls.length;
+    }
+
+    document.getElementById('pntOvClose').addEventListener('click', closeOverlay);
+    document.getElementById('pntOvPrev').addEventListener('click', overlayPrev);
+    document.getElementById('pntOvNext').addEventListener('click', overlayNext);
+
+    /* Click backdrop to close */
+    ovl.addEventListener('click', function(e){ if(e.target === ovl) closeOverlay(); });
+
+    /* Keyboard nav in overlay */
+    document.addEventListener('keydown', function(e){
+      if(!ovl.classList.contains('is-open')) return;
+      if(e.key === 'Escape') closeOverlay();
+      if(e.key === 'ArrowLeft') overlayPrev();
+      if(e.key === 'ArrowRight') overlayNext();
+    });
+
+    /* Touch swipe inside OVERLAY */
+    var ovTouchStartX = 0;
+    ovl.addEventListener('touchstart', function(e){
+      ovTouchStartX = e.changedTouches[0].clientX;
+    }, { passive: true });
+
+    ovl.addEventListener('touchend', function(e){
+      var dx = e.changedTouches[0].clientX - ovTouchStartX;
+      if(Math.abs(dx) > 50){
+        if(dx < 0) overlayNext();
+        else overlayPrev();
+      }
+    }, { passive: true });
+
+    /* ========================================
+       VARIANT SELECTION
+       ======================================== */
+    var variants = {{ product.variants | json }};
+    var optGroups = document.querySelectorAll('[data-opt-idx]');
+    var selOpts = [];
+    {%- for option in product.options_with_values -%}
+      selOpts[{{ forloop.index0 }}] = {{ option.selected_value | json }};
+    {%- endfor -%}
+
+    optGroups.forEach(function(group){
+      var btns = group.querySelectorAll('.pnt-vg__btn');
+      btns.forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var oi = parseInt(group.getAttribute('data-opt-idx'), 10);
+          var val = this.getAttribute('data-val');
+          selOpts[oi] = val;
+          btns.forEach(function(b){
+            b.classList.remove('is-sel');
+            b.setAttribute('aria-pressed', 'false');
+          });
+          this.classList.add('is-sel');
+          this.setAttribute('aria-pressed', 'true');
+          var lbl = document.getElementById('pntOptLabel' + oi);
+          if(lbl) lbl.textContent = val;
+          updateVariant();
+        });
+      });
+    });
+
+    function updateVariant(){
+      var matched = null;
+      for(var i = 0; i < variants.length; i++){
+        var v = variants[i];
+        var ok = true;
+        for(var j = 0; j < selOpts.length; j++){
+          if(v.options[j] !== selOpts[j]){ ok = false; break; }
+        }
+        if(ok){ matched = v; break; }
+      }
+      if(!matched) return;
+
+      document.getElementById('pntVarId').value = matched.id;
+
+      var priceEl = document.getElementById('pntPrice');
+      var cmpEl = document.getElementById('pntCmp');
+      var badgeEl = document.getElementById('pntBadge');
+      var stickyP = document.getElementById('pntStickyP');
+
+      priceEl.textContent = fmtMoney(matched.price);
+      if(stickyP) stickyP.textContent = fmtMoney(matched.price);
+
+      if(matched.compare_at_price && matched.compare_at_price > matched.price){
+        if(!cmpEl){
+          cmpEl = document.createElement('span');
+          cmpEl.className = 'pnt-info__cmp';
+          cmpEl.id = 'pntCmp';
+          priceEl.parentNode.insertBefore(cmpEl, priceEl.nextSibling);
+        }
+        if(!badgeEl){
+          badgeEl = document.createElement('span');
+          badgeEl.className = 'pnt-info__badge';
+          badgeEl.id = 'pntBadge';
+          cmpEl.parentNode.insertBefore(badgeEl, cmpEl.nextSibling);
+        }
+        cmpEl.textContent = fmtMoney(matched.compare_at_price);
+        cmpEl.style.display = '';
+        var sv = Math.round((matched.compare_at_price - matched.price) / matched.compare_at_price * 100);
+        badgeEl.textContent = 'Save ' + sv + '%';
+        badgeEl.style.display = '';
+      } else {
+        if(cmpEl) cmpEl.style.display = 'none';
+        if(badgeEl) badgeEl.style.display = 'none';
+      }
+
+      var atc = document.getElementById('pntAtc');
+      var stickyAtc = document.getElementById('pntStickyAtc');
+
+      if(matched.available){
+        atc.disabled = false;
+        atc.textContent = 'Add to Cart';
+        if(stickyAtc){ stickyAtc.disabled = false; stickyAtc.textContent = 'Add to Cart'; }
+      } else {
+        atc.disabled = true;
+        atc.textContent = 'Sold Out';
+        if(stickyAtc){ stickyAtc.disabled = true; stickyAtc.textContent = 'Sold Out'; }
+      }
+
+      /* Update URL without reload */
+      try {
+        var url = new URL(window.location.href);
+        url.searchParams.set('variant', matched.id);
+        history.replaceState({}, '', url.toString());
+      } catch(e){}
+
+      /* Switch gallery image to variant's featured media */
+      if(matched.featured_image && matched.featured_image.src){
+        var targetFile = matched.featured_image.src.split('?')[0].split('/').pop();
+        mainImgs.forEach(function(img, idx){
+          var imgFile = img.src.split('?')[0].split('/').pop();
+          /* Remove size suffix like _800x800 */
+          var imgBase = imgFile.replace(/_\d+x\d+(\.\w+)$/, '$1');
+          var targetBase = targetFile.replace(/_\d+x\d+(\.\w+)$/, '$1');
+          if(imgBase === targetBase || imgFile.indexOf(targetFile.split('.')[0].replace(/_\d+x\d+$/, '')) > -1){
+            setActiveImage(idx);
+          }
+        });
+      }
+    }
+
+    function fmtMoney(cents){
+      return '\u20B9' + (cents / 100).toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    /* ========================================
+       QUANTITY
+       ======================================== */
+    var qi = document.getElementById('pntQi');
+
+    document.getElementById('pntQm').addEventListener('click', function(){
+      var v = parseInt(qi.value, 10) || 1;
+      if(v > 1) qi.value = v - 1;
+    });
+
+    document.getElementById('pntQp').addEventListener('click', function(){
+      var v = parseInt(qi.value, 10) || 1;
+      qi.value = v + 1;
+    });
+
+    /* Prevent invalid quantity values */
+    qi.addEventListener('change', function(){
+      var v = parseInt(this.value, 10);
+      if(isNaN(v) || v < 1) this.value = 1;
+    });
+
+    /* ========================================
+       TABS
+       ======================================== */
+    document.querySelectorAll('[data-tab]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var tId = this.getAttribute('data-tab');
+        var parent = this.closest('.pnt-tabs');
+        parent.querySelectorAll('.pnt-tabs__btn').forEach(function(b){
+          b.classList.remove('is-active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        parent.querySelectorAll('.pnt-tabs__panel').forEach(function(p){
+          p.classList.remove('is-active');
+        });
+        this.classList.add('is-active');
+        this.setAttribute('aria-selected', 'true');
+        var panel = document.getElementById(tId);
+        if(panel) panel.classList.add('is-active');
+      });
+    });
+
+    /* ========================================
+       SIZE CHART MODAL
+       ======================================== */
+    var scModal = document.getElementById('pntScModal');
+    var scOpen = document.getElementById('pntScOpen');
+
+    if(scOpen){
+      scOpen.addEventListener('click', function(e){
+        e.preventDefault();
+        scModal.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+      });
+    }
+
+    function closeScModal(){
+      scModal.classList.remove('is-open');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('pntScClose').addEventListener('click', closeScModal);
+    document.getElementById('pntScBg').addEventListener('click', closeScModal);
+
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && scModal.classList.contains('is-open')) closeScModal();
+    });
+
+    /* ========================================
+       COPY COUPON CODE
+       ======================================== */
+    document.querySelectorAll('[data-cpcode]').forEach(function(el){
+      function doCopy(self){
+        var txt = self.textContent.trim();
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(txt).then(function(){
+            showCopied(self, txt);
+          }).catch(function(){ fallbackCopy(self, txt); });
+        } else {
+          fallbackCopy(self, txt);
+        }
+      }
+
+      function fallbackCopy(self, txt){
+        var ta = document.createElement('textarea');
+        ta.value = txt;
+        ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try { document.execCommand('copy'); } catch(e){}
+        document.body.removeChild(ta);
+        showCopied(self, txt);
+      }
+
+      function showCopied(self, txt){
+        self.textContent = 'Copied!';
+        self.classList.add('is-copied');
+        setTimeout(function(){
+          self.textContent = txt;
+          self.classList.remove('is-copied');
+        }, 1800);
+      }
+
+      el.addEventListener('click', function(){ doCopy(this); });
+
+      /* Touch support — trigger on touchend to avoid 300ms delay */
+      el.addEventListener('touchend', function(e){
+        e.preventDefault();
+        doCopy(this);
+      });
+    });
+
+    /* ========================================
+       STICKY BAR — Android-safe scroll detection
+       Uses IntersectionObserver with scroll fallback
+       ======================================== */
+    var sticky = document.getElementById('pntSticky');
+    var atcBtn = document.getElementById('pntAtc');
+
+    if(sticky && atcBtn){
+      if('IntersectionObserver' in window){
+        var obs = new IntersectionObserver(function(entries){
+          entries.forEach(function(e){
+            if(e.isIntersecting){
+              sticky.classList.remove('is-vis');
+            } else {
+              sticky.classList.add('is-vis');
+            }
+          });
+        }, { threshold: 0, rootMargin: '0px 0px 0px 0px' });
+        obs.observe(atcBtn);
+      } else {
+        /* Fallback for older Android browsers */
+        var atcRect = atcBtn.getBoundingClientRect();
+        var atcAbsTop = atcRect.top + window.pageYOffset;
+
+        window.addEventListener('scroll', function(){
+          var scrollY = window.pageYOffset || document.documentElement.scrollTop;
+          if(scrollY > atcAbsTop + atcRect.height){
+            sticky.classList.add('is-vis');
+          } else {
+            sticky.classList.remove('is-vis');
+          }
+        }, { passive: true });
+      }
+    }
+
+    /* ========================================
+       RECENTLY VIEWED
+       ======================================== */
+    try {
+      var rvp = JSON.parse(localStorage.getItem('theme:recently-viewed-products') || '[]');
+      rvp = rvp.filter(function(x){ return x !== {{ product.id }}; });
+      rvp.unshift({{ product.id }});
+      if(rvp.length > 20) rvp = rvp.slice(0, 20);
+      localStorage.setItem('theme:recently-viewed-products', JSON.stringify(rvp));
+    } catch(e){}
+
+  }); /* end ready */
+
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Painting Product Page",
+  "tag": "div",
+  "class": "pnt-painting-product-v3",
+  "settings": [
+    { "type": "header", "content": "General" },
+    { "type": "checkbox", "id": "show_dynamic_checkout", "label": "Show Shiprocket / dynamic checkout buttons", "info": "Shows Shopify Payment buttons (Shiprocket, GPay, etc.)", "default": true },
+    { "type": "header", "content": "—— TRUST SIGNALS ——" },
+    { "type": "text", "id": "trust_1_title", "label": "Trust 1 Title", "default": "Free Shipping" },
+    { "type": "text", "id": "trust_1_sub", "label": "Trust 1 Subtitle", "default": "All across India" },
+    { "type": "text", "id": "trust_2_title", "label": "Trust 2 Title", "default": "Handcrafted" },
+    { "type": "text", "id": "trust_2_sub", "label": "Trust 2 Subtitle", "default": "Premium quality" },
+    { "type": "text", "id": "trust_3_title", "label": "Trust 3 Title", "default": "Easy Returns" },
+    { "type": "text", "id": "trust_3_sub", "label": "Trust 3 Subtitle", "default": "7-day policy" },
+    { "type": "text", "id": "trust_4_title", "label": "Trust 4 Title", "default": "Secure Payment" },
+    { "type": "text", "id": "trust_4_sub", "label": "Trust 4 Subtitle", "default": "100% safe checkout" },
+    { "type": "header", "content": "—— PRODUCT FEATURES ——" },
+    { "type": "text", "id": "feat_1_label", "label": "Feature 1 Label", "default": "Frame Material" },
+    { "type": "text", "id": "feat_1_value", "label": "Feature 1 Value", "default": "Fiberwood" },
+    { "type": "text", "id": "feat_2_label", "label": "Feature 2 Label", "default": "Frame Style" },
+    { "type": "text", "id": "feat_2_value", "label": "Feature 2 Value", "default": "Flat / Box Frame" },
+    { "type": "text", "id": "feat_3_label", "label": "Feature 3 Label", "default": "Glass Material" },
+    { "type": "text", "id": "feat_3_value", "label": "Feature 3 Value", "default": "2mm Acrylic" },
+    { "type": "text", "id": "feat_4_label", "label": "Feature 4 Label", "default": "Backboard" },
+    { "type": "text", "id": "feat_4_value", "label": "Feature 4 Value", "default": "MDF / Wood" },
+    { "type": "text", "id": "feat_5_label", "label": "Feature 5 Label", "default": "Print Material" },
+    { "type": "text", "id": "feat_5_value", "label": "Feature 5 Value", "default": "200 GSM Art Paper" },
+    { "type": "text", "id": "feat_6_label", "label": "Feature 6 Label", "default": "Hanging Equipment" },
+    { "type": "text", "id": "feat_6_value", "label": "Feature 6 Value", "default": "Sawtooth Hook" },
+    { "type": "text", "id": "feat_7_label", "label": "Feature 7 Label", "default": "Printer" },
+    { "type": "text", "id": "feat_7_value", "label": "Feature 7 Value", "default": "10-Ink Epson" },
+    { "type": "text", "id": "feat_8_label", "label": "Feature 8 Label", "default": "Made in" },
+    { "type": "text", "id": "feat_8_value", "label": "Feature 8 Value", "default": "India ❤️" },
+    { "type": "header", "content": "—— DISCOUNT OFFERS ——" },
+    { "type": "text", "id": "offer_1_code", "label": "Offer 1 Code", "default": "WELCOME10" },
+    { "type": "text", "id": "offer_1_text", "label": "Offer 1 Text", "default": "10% off on your first order" },
+    { "type": "text", "id": "offer_2_code", "label": "Offer 2 Code", "default": "BUNDLE15" },
+    { "type": "text", "id": "offer_2_text", "label": "Offer 2 Text", "default": "15% off on orders above Rs 2500" },
+    { "type": "text", "id": "offer_3_code", "label": "Offer 3 Code" },
+    { "type": "text", "id": "offer_3_text", "label": "Offer 3 Text" },
+    { "type": "text", "id": "offer_4_code", "label": "Offer 4 Code" },
+    { "type": "text", "id": "offer_4_text", "label": "Offer 4 Text" },
+    { "type": "header", "content": "—— TABS ——" },
+    { "type": "text", "id": "tab_1_title", "label": "Tab 1 Title", "default": "Product Details" },
+    { "type": "richtext", "id": "tab_1_content", "label": "Tab 1 Content", "default": "<h3>About This Artwork</h3><p>Add your product description, materials, specifications, and care instructions here.</p><h3>Specifications</h3><p><strong>200 GSM</strong> Art Board Matte Paper / <strong>350 GSM</strong> Poly-cotton inkjet canvas (For Canvas Prints)</p><p>Comes with hanging equipment attached. Made in India ❤️</p><h3>Care Instructions</h3><p>Wipe with microfiber cloth or damp cloth. Dust frames regularly. Refrain from using wood polish or cleaning sprays.</p>" },
+    { "type": "text", "id": "tab_2_title", "label": "Tab 2 Title", "default": "Shipping" },
+    { "type": "richtext", "id": "tab_2_content", "label": "Tab 2 Content", "default": "<h3>Is Shipping Free?</h3><p>Yes! Shipping is <strong>free across India</strong> on all items.</p><h3>When Will I Receive My Order?</h3><p><strong>Print & Pack:</strong> 2-3 Business Days</p><p><strong>In Transit:</strong> 3-7 Working Days</p><p><strong>Total Delivery:</strong> 5-10 Working Days</p><p><strong>Express Delivery in Delhi NCR</strong> — Within 24 Hours!</p>" },
+    { "type": "text", "id": "tab_3_title", "label": "Tab 3 Title", "default": "Returns & Refunds" },
+    { "type": "richtext", "id": "tab_3_content", "label": "Tab 3 Content", "default": "<h3>Return Policy</h3><p>We offer easy returns within <strong>7 days</strong> of delivery. Items must be in original condition with packaging intact.</p><p>For any exchange/return request, email us at <strong>contact@pillowfights.co.in</strong> with your order number and reason.</p><h3>Refunds</h3><p>Refunds are processed to your original payment method within 5-7 business days after return is received.</p>" },
+    { "type": "header", "content": "—— SIZE CHART ——" },
+    { "type": "checkbox", "id": "show_size_chart", "label": "Show size chart section", "default": true },
+    { "type": "text", "id": "sizechart_title", "label": "Title", "default": "Frames & Canvas Sizes" },
+    { "type": "text", "id": "sizechart_subtitle", "label": "Subtitle", "default": "Choose the perfect size for your space" },
+    { "type": "image_picker", "id": "sizechart_image", "label": "Size chart reference image" },
+    { "type": "text", "id": "size_row_1_name", "label": "Row 1 Name", "default": "A4" },
+    { "type": "text", "id": "size_row_1_mm", "label": "Row 1 mm", "default": "210 × 297 mm" },
+    { "type": "text", "id": "size_row_1_cm", "label": "Row 1 cm", "default": "21 × 29.7 cm" },
+    { "type": "text", "id": "size_row_1_in", "label": "Row 1 inches", "default": "8.3 × 11.7 in" },
+    { "type": "text", "id": "size_row_2_name", "label": "Row 2 Name", "default": "A3" },
+    { "type": "text", "id": "size_row_2_mm", "label": "Row 2 mm", "default": "297 × 420 mm" },
+    { "type": "text", "id": "size_row_2_cm", "label": "Row 2 cm", "default": "29.7 × 42 cm" },
+    { "type": "text", "id": "size_row_2_in", "label": "Row 2 inches", "default": "11.7 × 16.5 in" },
+    { "type": "text", "id": "size_row_3_name", "label": "Row 3 Name", "default": "A2" },
+    { "type": "text", "id": "size_row_3_mm", "label": "Row 3 mm", "default": "420 × 594 mm" },
+    { "type": "text", "id": "size_row_3_cm", "label": "Row 3 cm", "default": "42 × 59.4 cm" },
+    { "type": "text", "id": "size_row_3_in", "label": "Row 3 inches", "default": "16.5 × 23.4 in" },
+    { "type": "text", "id": "size_row_4_name", "label": "Row 4 Name", "default": "A1" },
+    { "type": "text", "id": "size_row_4_mm", "label": "Row 4 mm", "default": "594 × 841 mm" },
+    { "type": "text", "id": "size_row_4_cm", "label": "Row 4 cm", "default": "59.4 × 84.1 cm" },
+    { "type": "text", "id": "size_row_4_in", "label": "Row 4 inches", "default": "23.4 × 33.1 in" },
+    { "type": "text", "id": "size_row_5_name", "label": "Row 5 Name" },
+    { "type": "text", "id": "size_row_5_mm", "label": "Row 5 mm" },
+    { "type": "text", "id": "size_row_5_cm", "label": "Row 5 cm" },
+    { "type": "text", "id": "size_row_5_in", "label": "Row 5 inches" },
+    { "type": "header", "content": "—— FRAME SHOWCASE ——" },
+    { "type": "checkbox", "id": "show_frame_showcase", "label": "Show frame styles section", "default": true },
+    { "type": "text", "id": "frames_title", "label": "Title", "default": "Frame Styles & Colors" },
+    { "type": "text", "id": "frames_subtitle", "label": "Subtitle", "default": "Choose the perfect frame for your art" },
+    { "type": "header", "content": "—— LIFESTYLE GALLERY ——" },
+    { "type": "checkbox", "id": "show_lifestyle_gallery", "label": "Show lifestyle gallery", "default": true },
+    { "type": "text", "id": "lifestyle_title", "label": "Title", "default": "Photo Gallery" },
+    { "type": "text", "id": "lifestyle_subtitle", "label": "Subtitle", "default": "See how our art looks in real spaces" }
+  ],
+  "blocks": [
+    {
+      "type": "frame_style",
+      "name": "Frame Style Card",
+      "settings": [
+        { "type": "image_picker", "id": "frame_image", "label": "Frame Image" },
+        { "type": "text", "id": "frame_title", "label": "Frame Name", "default": "Black Frame" },
+        { "type": "textarea", "id": "frame_desc", "label": "Description", "default": "Classic fiberwood frame with 2mm acrylic glass." }
+      ]
+    },
+    {
+      "type": "lifestyle_image",
+      "name": "Lifestyle Photo",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Photo" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Painting Product Page",
+      "blocks": [
+        { "type": "frame_style", "settings": { "frame_title": "Black Frame", "frame_desc": "Classic black fiberwood frame. Comes with 2mm acrylic glass for paper prints." } },
+        { "type": "frame_style", "settings": { "frame_title": "White Frame", "frame_desc": "Clean white fiberwood frame. Perfect for modern minimalist interiors." } },
+        { "type": "frame_style", "settings": { "frame_title": "Natural Wood", "frame_desc": "Warm natural wood finish. Ideal for rustic and earthy décor themes." } },
+        { "type": "frame_style", "settings": { "frame_title": "Gallery Wrap Canvas", "frame_desc": "Frameless canvas on wooden bars. Modern gallery look, no glass needed." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

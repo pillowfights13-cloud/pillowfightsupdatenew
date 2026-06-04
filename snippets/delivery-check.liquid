@@ -1,0 +1,607 @@
+<div class="pf-delivery" id="pfDelivery">
+  <!-- Header -->
+  <div class="pf-delivery__head">
+    <div class="pf-delivery__icon">
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="1" y="3" width="15" height="13" rx="1"/>
+        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+        <circle cx="5.5" cy="18.5" r="2.5"/>
+        <circle cx="18.5" cy="18.5" r="2.5"/>
+      </svg>
+    </div>
+    <div class="pf-delivery__head-text">
+      <strong>Delivery Options</strong>
+      <span>Enter your pincode to check availability &amp; delivery date</span>
+    </div>
+  </div>
+
+  <!-- Input row -->
+  <div class="pf-delivery__row">
+    <div class="pf-delivery__input-wrap">
+      <input
+        type="text"
+        id="pfPincodeInput"
+        class="pf-delivery__input"
+        placeholder="Enter 6-digit pincode"
+        maxlength="6"
+        inputmode="numeric"
+        pattern="[0-9]*"
+        autocomplete="postal-code"
+      >
+      <div class="pf-delivery__input-line"></div>
+    </div>
+    <button
+      type="button"
+      id="pfCheckBtn"
+      class="pf-delivery__btn"
+      data-sku="{{ product_sku }}"
+      data-tags="{{ product_tags }}"
+      data-overriden-days="{{ overriden_days }}"
+    >
+      Check
+    </button>
+  </div>
+
+  <!-- Result area (hidden by default) -->
+  <div class="pf-delivery__result" id="pfResult">
+    <!-- Populated by JS -->
+  </div>
+</div>
+
+<!-- ================================ -->
+<!-- STYLES -->
+<!-- ================================ -->
+<style>
+  /* ---- Design tokens (inherit from site if available) ---- */
+  .pf-delivery {
+    --pfd-gold: #C49B66;
+    --pfd-gold-light: #f5ece0;
+    --pfd-black: #000000;
+    --pfd-dark: #1a1a1a;
+    --pfd-white: #ffffff;
+    --pfd-cream: #F9F6F1;
+    --pfd-text: #333333;
+    --pfd-muted: #888888;
+    --pfd-border: #e4dfd8;
+    --pfd-red: #c0392b;
+    --pfd-green: #1a7a4c;
+    --pfd-green-bg: #eaf6f0;
+
+    width: 100%;
+    max-width: 100%;
+    border: 1px solid var(--pfd-border);
+    border-radius: 6px;
+    padding: 20px;
+    margin: 20px 0;
+    background: var(--pfd-white);
+    box-sizing: border-box;
+    font-family: inherit;
+  }
+
+  .pf-delivery *,
+  .pf-delivery *::before,
+  .pf-delivery *::after {
+    box-sizing: border-box;
+  }
+
+  /* ---- Header ---- */
+  .pf-delivery__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .pf-delivery__icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--pfd-cream);
+    border-radius: 8px;
+    color: var(--pfd-gold);
+  }
+
+  .pf-delivery__head-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .pf-delivery__head-text strong {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--pfd-dark);
+    letter-spacing: 0.2px;
+    line-height: 1.3;
+  }
+
+  .pf-delivery__head-text span {
+    font-size: 12px;
+    color: var(--pfd-muted);
+    line-height: 1.4;
+    letter-spacing: 0.1px;
+  }
+
+  /* ---- Input row ---- */
+  .pf-delivery__row {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .pf-delivery__input-wrap {
+    flex: 1;
+    position: relative;
+    min-width: 0;
+  }
+
+  .pf-delivery__input {
+    width: 100%;
+    padding: 11px 14px;
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--pfd-dark);
+    background: var(--pfd-cream);
+    border: 1.5px solid var(--pfd-border);
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    letter-spacing: 1.5px;
+    -webkit-appearance: none;
+    appearance: none;
+    font-family: inherit;
+  }
+
+  .pf-delivery__input::placeholder {
+    color: #b5b0a8;
+    letter-spacing: 0.3px;
+    font-size: 13px;
+  }
+
+  .pf-delivery__input:focus {
+    border-color: var(--pfd-gold);
+    box-shadow: 0 0 0 3px rgba(196, 155, 102, 0.12);
+  }
+
+  .pf-delivery__input.is-error {
+    border-color: var(--pfd-red);
+    box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.08);
+  }
+
+  /* Animated underline accent */
+  .pf-delivery__input-line {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--pfd-gold);
+    border-radius: 0 0 5px 5px;
+    transition: width 0.3s ease, left 0.3s ease;
+    pointer-events: none;
+  }
+
+  .pf-delivery__input:focus ~ .pf-delivery__input-line {
+    width: 100%;
+    left: 0;
+  }
+
+  /* ---- Button ---- */
+  .pf-delivery__btn {
+    flex-shrink: 0;
+    padding: 0 28px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--pfd-white);
+    background: var(--pfd-black);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+
+  .pf-delivery__btn:hover {
+    background: var(--pfd-dark);
+    transform: translateY(-1px);
+  }
+
+  .pf-delivery__btn:active {
+    transform: translateY(0);
+  }
+
+  .pf-delivery__btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Loading state */
+  .pf-delivery__btn.is-loading {
+    pointer-events: none;
+    position: relative;
+    color: transparent;
+  }
+
+  .pf-delivery__btn.is-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: var(--pfd-white);
+    border-radius: 50%;
+    animation: pfSpin 0.6s linear infinite;
+  }
+
+  @keyframes pfSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ---- Result area ---- */
+  .pf-delivery__result {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease, margin 0.3s ease;
+    margin-top: 0;
+  }
+
+  .pf-delivery__result.is-visible {
+    max-height: 200px;
+    opacity: 1;
+    margin-top: 16px;
+  }
+
+  /* Result states */
+  .pf-delivery__msg {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: 5px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .pf-delivery__msg-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+
+  /* Success state */
+  .pf-delivery__msg--success {
+    background: var(--pfd-green-bg);
+    color: var(--pfd-green);
+    border: 1px solid #c4e3d4;
+  }
+
+  .pf-delivery__msg--success .pf-delivery__msg-date {
+    font-weight: 600;
+    color: var(--pfd-green);
+  }
+
+  /* Error state */
+  .pf-delivery__msg--error {
+    background: #fdf2f1;
+    color: var(--pfd-red);
+    border: 1px solid #f0d0cd;
+  }
+
+  /* Not serviceable state */
+  .pf-delivery__msg--noservice {
+    background: var(--pfd-cream);
+    color: var(--pfd-text);
+    border: 1px solid var(--pfd-border);
+  }
+
+  .pf-delivery__msg-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .pf-delivery__msg-sub {
+    display: block;
+    font-size: 11px;
+    color: var(--pfd-muted);
+    margin-top: 3px;
+  }
+
+  /* ---- COD badge ---- */
+  .pf-delivery__cod {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+    padding: 6px 12px;
+    background: var(--pfd-cream);
+    border: 1px solid var(--pfd-border);
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--pfd-text);
+    letter-spacing: 0.3px;
+  }
+
+  .pf-delivery__cod svg {
+    color: var(--pfd-gold);
+  }
+
+  /* ================================ */
+  /* RESPONSIVE                       */
+  /* ================================ */
+  @media (max-width: 480px) {
+    .pf-delivery {
+      padding: 16px;
+      margin: 16px 0;
+      border-radius: 5px;
+    }
+
+    .pf-delivery__icon {
+      width: 36px;
+      height: 36px;
+    }
+
+    .pf-delivery__icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .pf-delivery__head-text strong {
+      font-size: 14px;
+    }
+
+    .pf-delivery__head-text span {
+      font-size: 11px;
+    }
+
+    .pf-delivery__head {
+      margin-bottom: 14px;
+    }
+
+    .pf-delivery__input {
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+
+    .pf-delivery__btn {
+      padding: 0 18px;
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+
+    .pf-delivery__msg {
+      padding: 12px 14px;
+      font-size: 13px;
+    }
+
+    .pf-delivery__msg-sub {
+      font-size: 10px;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .pf-delivery {
+      padding: 14px;
+    }
+
+    .pf-delivery__row {
+      gap: 8px;
+    }
+
+    .pf-delivery__btn {
+      padding: 0 14px;
+      font-size: 11px;
+    }
+  }
+</style>
+
+<!-- ================================ -->
+<!-- JAVASCRIPT -->
+<!-- ================================ -->
+<script>
+  (function () {
+    'use strict';
+
+    /* ==================================
+     CONFIGURATION — edit these
+  ================================== */
+
+    // Your CSV file URL on Shopify CDN
+    var LIGHT_CSV_URL = 'https://cdn.shopify.com/s/files/1/0688/9357/3180/files/light.csv?v=1772437911';
+
+    // Tag → additional days mapping
+    var mapping = {
+      heavy: 4,
+      fragile: 3,
+      'made-to-order': 7,
+      custom: 10,
+      others: 2,
+    };
+
+    /* ================================== */
+
+    var pincodeInput = document.getElementById('pfPincodeInput');
+    var checkBtn = document.getElementById('pfCheckBtn');
+    var resultEl = document.getElementById('pfResult');
+
+    if (!pincodeInput || !checkBtn || !resultEl) return;
+
+    // Allow only digits in input
+    pincodeInput.addEventListener('input', function () {
+      this.value = this.value.replace(/[^0-9]/g, '');
+      this.classList.remove('is-error');
+      // Hide result when user starts retyping
+      if (resultEl.classList.contains('is-visible')) {
+        resultEl.classList.remove('is-visible');
+      }
+    });
+
+    // Check on Enter key
+    pincodeInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        checkBtn.click();
+      }
+    });
+
+    // Main check handler
+    checkBtn.addEventListener('click', function () {
+      var pincode = pincodeInput.value.trim();
+
+      // Validate 6 digits
+      if (!pincode || pincode.length !== 6 || !/^\d{6}$/.test(pincode)) {
+        pincodeInput.classList.add('is-error');
+        showResult('error', 'Please enter a valid 6-digit pincode.');
+        pincodeInput.focus();
+        return;
+      }
+
+      var sku = checkBtn.dataset.sku || '';
+      var overridenData = checkBtn.getAttribute('data-overriden-days') || '';
+      var productTags = (checkBtn.dataset.tags || '').split(',').map(function (t) {
+        return t.trim();
+      });
+
+      // Loading state
+      checkBtn.classList.add('is-loading');
+      checkBtn.disabled = true;
+      resultEl.classList.remove('is-visible');
+
+      fetchAndParseCSV(LIGHT_CSV_URL, pincode).then(function (deliveryDays) {
+        checkBtn.classList.remove('is-loading');
+        checkBtn.disabled = false;
+
+        if (deliveryDays === 'not_serviceable') {
+          showResult(
+            'noservice',
+            "Sorry, we don't deliver to this pincode yet.",
+            'Try a nearby pincode or contact us on WhatsApp.'
+          );
+          return;
+        }
+
+        if (deliveryDays === 'fetch_error') {
+          showResult('error', 'Unable to check delivery. Please try again.', 'If this persists, contact us directly.');
+          return;
+        }
+
+        // Calculate additional days
+        var additionalDays;
+        if (overridenData && overridenData !== '') {
+          additionalDays = parseInt(overridenData, 10);
+        } else {
+          additionalDays = mapping['others'] || 2;
+          for (var i = 0; i < productTags.length; i++) {
+            if (mapping[productTags[i]]) {
+              additionalDays = mapping[productTags[i]];
+              break;
+            }
+          }
+        }
+
+        var totalDays = parseInt(deliveryDays, 10) + additionalDays;
+        var deliveryDate = new Date();
+        deliveryDate.setDate(deliveryDate.getDate() + totalDays);
+
+        var options = { weekday: 'short', day: 'numeric', month: 'long' };
+        var formatted = deliveryDate.toLocaleDateString('en-IN', options);
+
+        showResult('success', 'Get it by ' + formatted, 'Free shipping on prepaid orders');
+      });
+    });
+
+    // Fetch and parse CSV
+    function fetchAndParseCSV(url, pincode) {
+      return fetch(url)
+        .then(function (response) {
+          if (!response.ok) throw new Error('HTTP ' + response.status);
+          return response.text();
+        })
+        .then(function (data) {
+          var lines = data.trim().split('\n');
+          for (var i = 0; i < lines.length; i++) {
+            var parts = lines[i].split(',');
+            if (parts[0] === pincode) {
+              return parseInt(parts[1], 10);
+            }
+          }
+          return 'not_serviceable';
+        })
+        .catch(function (err) {
+          console.error('Delivery check error:', err);
+          return 'fetch_error';
+        });
+    }
+
+    // Render result
+    function showResult(type, message, sub) {
+      var iconSvg = '';
+      var stateClass = '';
+
+      if (type === 'success') {
+        stateClass = 'pf-delivery__msg--success';
+        iconSvg =
+          '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="#1a7a4c" stroke-width="1.5"/><polyline points="6,10 9,13 14,7" fill="none" stroke="#1a7a4c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      } else if (type === 'error') {
+        stateClass = 'pf-delivery__msg--error';
+        iconSvg =
+          '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="#c0392b" stroke-width="1.5"/><line x1="10" y1="6" x2="10" y2="11" stroke="#c0392b" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="14" r="1" fill="#c0392b"/></svg>';
+      } else {
+        stateClass = 'pf-delivery__msg--noservice';
+        iconSvg =
+          '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="#888" stroke-width="1.5"/><line x1="7" y1="7" x2="13" y2="13" stroke="#888" stroke-width="1.8" stroke-linecap="round"/><line x1="13" y1="7" x2="7" y2="13" stroke="#888" stroke-width="1.8" stroke-linecap="round"/></svg>';
+      }
+
+      var html = '<div class="pf-delivery__msg ' + stateClass + '">';
+      html += '<div class="pf-delivery__msg-icon">' + iconSvg + '</div>';
+      html += '<div class="pf-delivery__msg-text">';
+      html += '<span>' + message + '</span>';
+      if (sub) {
+        html += '<span class="pf-delivery__msg-sub">' + sub + '</span>';
+      }
+      html += '</div></div>';
+
+      // Add COD badge on success
+      if (type === 'success') {
+        html += '<div class="pf-delivery__cod">';
+        html +=
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>';
+        html += ' Cash on Delivery available';
+        html += '</div>';
+      }
+
+      resultEl.innerHTML = html;
+
+      // Trigger animation
+      requestAnimationFrame(function () {
+        resultEl.classList.add('is-visible');
+      });
+    }
+  })();
+</script>

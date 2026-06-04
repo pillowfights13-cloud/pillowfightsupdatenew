@@ -1,0 +1,298 @@
+{% comment %}
+  Pillow Fights — Newsletter Popup Snippet
+  Shows on: Homepage only
+  Trigger: 8 seconds after page load
+  Cookie: 30-day suppress after first show
+  
+  Install: Add {% render 'pillow-fights-popup' %} just before </body> in layout/theme.liquid
+  File location: snippets/pillow-fights-popup.liquid
+{% endcomment %}
+
+{% if template == 'index' %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+
+<style>
+  /* ── Overlay ── */
+  #pf-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(44,28,10,0.58);
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  #pf-overlay.active { display: flex; }
+
+  /* ── Modal shell ── */
+  #pf-modal {
+    display: flex;
+    width: 660px;
+    max-width: 95vw;
+    background: #fdf8f2;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 12px 60px rgba(60,35,5,0.22);
+    border: 1px solid #d9c49a;
+    animation: pf-fadein 0.4s ease;
+  }
+  @keyframes pf-fadein {
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  /* ── Corner brackets ── */
+  .pf-corner {
+    position: absolute;
+    width: 20px; height: 20px;
+    z-index: 5; pointer-events: none;
+  }
+  #pf-c-tl { top:10px; left:10px; border-top:1.5px solid #b8966a; border-left:1.5px solid #b8966a; }
+  #pf-c-tr { top:10px; right:10px; border-top:1.5px solid #b8966a; border-right:1.5px solid #b8966a; }
+  #pf-c-bl { bottom:10px; left:10px; border-bottom:1.5px solid #b8966a; border-left:1.5px solid #b8966a; }
+  #pf-c-br { bottom:10px; right:10px; border-bottom:1.5px solid #b8966a; border-right:1.5px solid #b8966a; }
+
+  /* ── Close ── */
+  #pf-close {
+    position: absolute; top:12px; right:14px;
+    background:none; border:none; cursor:pointer;
+    font-size:17px; color:#8a7055; z-index:10; line-height:1; padding:0;
+  }
+  #pf-close:hover { color:#2c1f10; }
+
+  /* ── Left image panel (desktop) ── */
+  #pf-left {
+    width: 46%;
+    position: relative;
+    overflow: hidden;
+    min-height: 420px;
+    flex-shrink: 0;
+  }
+  #pf-left img {
+    width:100%; height:100%;
+    object-fit:cover; object-position:center;
+    display:block;
+  }
+  #pf-left-overlay {
+    position:absolute; inset:0;
+    background: linear-gradient(to right, rgba(44,31,16,0) 55%, rgba(44,31,16,0.2) 100%);
+  }
+  #pf-left-tag {
+    position:absolute; bottom:24px; left:0; right:0;
+    text-align:center; z-index:2;
+  }
+  #pf-left-tag span {
+    display:inline-block;
+    background: rgba(184,150,106,0.88);
+    color:#fff8ee;
+    font-family:'Cormorant Garamond',Georgia,serif;
+    font-size:11px; letter-spacing:2.5px;
+    padding:6px 16px; text-transform:uppercase; font-weight:400;
+  }
+
+  /* ── Top image panel (mobile only) ── */
+  #pf-top-img {
+    display: none;
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    object-position: center 30%;
+    flex-shrink: 0;
+  }
+
+  /* ── Right / main content panel ── */
+  #pf-right {
+    flex:1; padding:2.4rem 2rem 2rem;
+    display:flex; flex-direction:column; justify-content:center;
+    background:#fdf8f2;
+  }
+
+  /* Mobile: icon above eyebrow */
+  #pf-icon {
+    display: none;
+    width: 40px; height: 40px;
+    border: 1px solid #d9c49a;
+    border-radius: 50%;
+    align-items: center; justify-content: center;
+    margin: 0 auto 14px;
+    color: #b8966a; font-size: 17px;
+  }
+
+  #pf-eyebrow {
+    font-size:10px; letter-spacing:2.5px;
+    text-transform:uppercase; color:#b8966a;
+    margin:0 0 10px; font-weight:500;
+  }
+  #pf-headline {
+    font-family:'Cormorant Garamond',Georgia,serif;
+    font-size:26px; font-weight:500;
+    color:#2c1f10; margin:0 0 6px; line-height:1.2;
+  }
+  #pf-headline em { font-style:italic; color:#b8966a; }
+  #pf-divider { width:36px; height:1px; background:#d9c49a; margin:12px 0; }
+  #pf-body {
+    font-size:12.5px; color:#7a6248;
+    line-height:1.65; margin:0 0 20px; letter-spacing:0.2px;
+  }
+  #pf-email {
+    width:100%; box-sizing:border-box;
+    padding:10px 12px; font-size:13px;
+    border:1px solid #d9c49a; border-radius:1px;
+    background:#fff; color:#2c1f10; margin-bottom:10px;
+    outline:none; font-family:inherit; transition:border-color 0.2s;
+  }
+  #pf-email::placeholder { color:#b8a48c; font-size:12.5px; }
+  #pf-email:focus { border-color:#b8966a; }
+  #pf-submit {
+    width:100%; background:#2c1f10; color:#f5e8d0;
+    border:none; padding:11px; border-radius:1px;
+    font-size:10px; letter-spacing:2.5px; cursor:pointer;
+    font-weight:500; text-transform:uppercase;
+    font-family:inherit; transition:background 0.25s;
+  }
+  #pf-submit:hover { background:#b8966a; }
+  #pf-success {
+    display:none;
+    background:#f5f0e8; border:1px solid #d9c49a;
+    border-radius:1px; padding:14px 12px; text-align:center;
+    color:#6b5030; font-size:14px;
+    font-family:'Cormorant Garamond',Georgia,serif;
+    font-style:italic; letter-spacing:0.3px;
+  }
+  #pf-skip {
+    margin-top:14px; text-align:center;
+    font-size:10.5px; color:#b8a48c; cursor:pointer;
+    letter-spacing:0.4px; text-decoration:underline;
+    background:none; border:none; padding:0;
+    display:block; width:100%; font-family:inherit;
+  }
+  #pf-skip:hover { color:#7a6248; }
+
+  /* ── Mobile overrides (≤560px) ── */
+  @media (max-width: 560px) {
+    #pf-modal {
+      flex-direction: column;
+      width: 100%;
+      max-width: 100%;
+      max-height: 92vh;
+      overflow-y: auto;
+      border-radius: 18px 18px 2px 2px;
+    }
+    #pf-left { display: none; }
+    #pf-top-img { display: block; }
+    #pf-icon { display: flex; }
+    #pf-right {
+      padding: 24px 20px 28px;
+      align-items: center;
+      text-align: center;
+    }
+    #pf-eyebrow { text-align: center; }
+    #pf-headline { font-size: 22px; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
+    #pf-divider { margin: 10px auto 12px; }
+    #pf-body { text-align: center; font-size: 12px; }
+    #pf-c-tl, #pf-c-tr, #pf-c-bl, #pf-c-br { width:16px; height:16px; }
+  }
+</style>
+
+<div id="pf-overlay" role="dialog" aria-modal="true" aria-label="Newsletter signup">
+  <div id="pf-modal">
+    <div class="pf-corner" id="pf-c-tl"></div>
+    <div class="pf-corner" id="pf-c-tr"></div>
+    <div class="pf-corner" id="pf-c-bl"></div>
+    <div class="pf-corner" id="pf-c-br"></div>
+    <button id="pf-close" aria-label="Close popup">&#x2715;</button>
+
+    {{- '<!-- Desktop left image panel -->' }}
+    <div id="pf-left">
+      <img
+        src="https://cdn.shopify.com/s/files/1/0688/9357/3180/files/Newsletter.jpg?v=1778152576"
+        alt="Pillow Fights handcrafted home decor"
+        loading="eager"
+      />
+      <div id="pf-left-overlay"></div>
+      <div id="pf-left-tag"><span>Handcrafted with care</span></div>
+    </div>
+
+    {{- '<!-- Mobile top image -->' }}
+    <img
+      id="pf-top-img"
+      src="https://cdn.shopify.com/s/files/1/0688/9357/3180/files/Newsletter.jpg?v=1778152576"
+      alt="Pillow Fights handcrafted home decor"
+      loading="eager"
+    />
+
+    <div id="pf-right">
+      <div id="pf-icon">✉</div>
+      <p id="pf-eyebrow">Welcome to Pillow Fights</p>
+      <h2 id="pf-headline">Subscribe &amp; get <em>5% off</em><br>your first order</h2>
+      <div id="pf-divider"></div>
+      <p id="pf-body">Know about new products, promotional offers and more — delivered to your inbox.</p>
+
+      <div id="pf-form-wrap" style="width:100%">
+        <input id="pf-email" type="email" placeholder="Enter your email" autocomplete="email" />
+        <button id="pf-submit">Subscribe</button>
+      </div>
+
+      <div id="pf-success">Thank you — your discount is on its way.</div>
+      <button id="pf-skip">No thanks, I'll pay full price</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var COOKIE = 'pf_popup_v4';
+
+  function getCookie(n) {
+    var m = document.cookie.match('(^|;)\\s*' + n + '\\s*=\\s*([^;]+)');
+    return m ? m.pop() : null; 
+  }
+  function setCookie(n, v, days) {
+    var d = new Date();
+    d.setTime(d.getTime() + days * 86400000);
+    document.cookie = n + '=' + v + ';expires=' + d.toUTCString() + ';path=/';
+  }
+
+  var overlay = document.getElementById('pf-overlay');
+  function openPopup()  { overlay.classList.add('active'); }
+  function closePopup() { overlay.classList.remove('active'); }
+
+  if (!getCookie(COOKIE)) {
+    setTimeout(function () {
+      openPopup();
+      setCookie(COOKIE, '1', 30);
+    }, 8000);
+  }
+
+  document.getElementById('pf-close').addEventListener('click', closePopup);
+  document.getElementById('pf-skip').addEventListener('click', closePopup);
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) closePopup();
+  });
+
+  document.getElementById('pf-submit').addEventListener('click', function () {
+    var email = document.getElementById('pf-email').value.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      document.getElementById('pf-email').style.borderColor = '#c0392b';
+      return;
+    }
+    fetch('/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'form_type=customer&utf8=%E2%9C%93&contact[email]='
+        + encodeURIComponent(email)
+        + '&contact[tags]=newsletter'
+    }).then(function () {
+      document.getElementById('pf-form-wrap').style.display = 'none';
+      document.getElementById('pf-skip').style.display = 'none';
+      document.getElementById('pf-success').style.display = 'block';
+    });
+  });
+})();
+</script>
+
+{% endif %}

@@ -1,0 +1,140 @@
+{% comment %}
+  Live Viewer Count Snippet
+  Usage: {% render 'live-viewer-count', min_viewers: 70, max_viewers: 500, min_interval: 3, max_interval: 8 %}
+  Parameters:
+    - min_viewers: Minimum viewer count (default: 70)
+    - max_viewers: Maximum viewer count (default: 500)
+    - min_interval: Minimum seconds between updates (default: 3)
+    - max_interval: Maximum seconds between updates (default: 8)
+  Note: Initial count is randomised on every page load — no static number is ever hardcoded.
+{% endcomment %}
+
+{% assign min_viewers  = min_viewers  | default: 70  %}
+{% assign max_viewers  = max_viewers  | default: 500 %}
+{% assign min_interval = min_interval | default: 3   %}
+{% assign max_interval = max_interval | default: 8   %}
+
+<div
+  class="lvc-wrapper"
+  id="lvc-{{ section.id }}"
+  data-min="{{ min_viewers }}"
+  data-max="{{ max_viewers }}"
+  data-min-interval="{{ min_interval }}"
+  data-max-interval="{{ max_interval }}"
+  aria-live="polite"
+  aria-atomic="true"
+>
+  <svg class="lvc-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M12 5C4 5 1 12 1 12s3 7 11 7 11-7 11-7-3-7-11-7zm0 11.5a4.5 4.5 0 110-9 4.5 4.5 0 010 9z"
+      stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M12 14a2 2 0 100-4 2 2 0 000 4z" fill="currentColor"/>
+  </svg>
+  <span class="lvc-count" aria-label="viewers"></span>
+  <span class="lvc-text">People Viewing This</span>
+</div>
+
+<style>
+  .lvc-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+    color: #111;
+    user-select: none;
+    line-height: 1;
+    margin: 6px 0;
+  }
+
+  .lvc-icon {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    color: #444;
+  }
+
+  .lvc-count {
+    font-weight: 700;
+    font-size: 12px;
+    min-width: 2ch;
+    display: inline-block;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    color: #111;
+  }
+
+  .lvc-count.lvc-bump {
+    transform: scale(1.15);
+    opacity: 0.7;
+  }
+
+  .lvc-text {
+    font-weight: 400;
+    font-size: 12px;
+    color: #444;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+  }
+
+  /* Desktop: slightly larger but still compact */
+  @media (min-width: 768px) {
+    .lvc-icon {
+      width: 14px;
+      height: 14px;
+    }
+    .lvc-count,
+    .lvc-text {
+      font-size: 13px;
+    }
+    .lvc-wrapper {
+      gap: 7px;
+    }
+  }
+</style>
+
+<script>
+(function () {
+  var el = document.getElementById('lvc-{{ section.id }}') || document.querySelector('.lvc-wrapper');
+  if (!el) return;
+
+  var min   = parseInt(el.dataset.min, 10)          || 70;
+  var max   = parseInt(el.dataset.max, 10)          || 500;
+  var minMs = (parseInt(el.dataset.minInterval, 10) || 3) * 1000;
+  var maxMs = (parseInt(el.dataset.maxInterval, 10) || 8) * 1000;
+
+  var countEl = el.querySelector('.lvc-count');
+
+  function rand(lo, hi) {
+    return Math.floor(Math.random() * (hi - lo + 1)) + lo;
+  }
+
+  /* Dynamic initial — fully JS generated, nothing hardcoded in HTML */
+  var current = rand(min, max);
+  countEl.textContent = current;
+
+  function nextCount(cur) {
+    var roll = Math.random();
+    var step;
+    if (roll < 0.55)      step = rand(1, 3);
+    else if (roll < 0.82) step = rand(4, 8);
+    else                  step = rand(9, 18);a
+
+    var direction = Math.random() < 0.52 ? 1 : -1;
+    return Math.min(max, Math.max(min, cur + direction * step));
+  }
+
+  function update() {
+    current = nextCount(current);
+
+    countEl.classList.remove('lvc-bump');
+    void countEl.offsetWidth;
+    countEl.textContent = current;
+    countEl.classList.add('lvc-bump');
+
+    var delay = rand(minMs, maxMs);
+    if (Math.random() < 0.2) delay = rand(minMs * 0.4, minMs * 0.8);
+
+    setTimeout(update, delay);
+  }
+
+  setTimeout(update, rand(minMs, maxMs));
+})();
+</script>

@@ -1,0 +1,689 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    background: #ffffff;
+    color: #1c1c1c;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .pf-wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 48px 24px 64px;
+  }
+
+  /* ---- SCREEN VISIBILITY ---- */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ---- PROGRESS ---- */
+  .prog-track {
+    width: 100%;
+    height: 1px;
+    background: #e8e8e0;
+    margin-bottom: 48px;
+  }
+  .prog-fill {
+    height: 1px;
+    background: #1c1c1c;
+    transition: width 0.5s ease;
+  }
+
+  /* ---- STEP LABEL ---- */
+  .step-eyebrow {
+    font-family: 'Jost', sans-serif;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 16px;
+  }
+
+  /* ---- QUESTION ---- */
+  .q-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-weight: 300;
+    line-height: 1.3;
+    color: #1c1c1c;
+    margin-bottom: 8px;
+    letter-spacing: 0.01em;
+  }
+  .q-sub {
+    font-size: 13px;
+    font-weight: 300;
+    color: #888;
+    margin-bottom: 36px;
+    line-height: 1.6;
+  }
+
+  /* ---- OPTIONS ---- */
+  .opts { display: flex; flex-direction: column; gap: 1px; background: #e8e8e0; border: 1px solid #e8e8e0; }
+  .opt {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 18px 20px;
+    background: #fff;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+  }
+  .opt:hover { background: #fafaf8; }
+  .opt.selected { background: #f5f5f0; }
+  .opt.selected::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: #1c1c1c;
+  }
+  .opt-num {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    color: #bbb;
+    min-width: 20px;
+    font-family: 'Jost', sans-serif;
+  }
+  .opt.selected .opt-num { color: #1c1c1c; }
+  .opt-body { flex: 1; }
+  .opt-title {
+    font-size: 14px;
+    font-weight: 400;
+    color: #1c1c1c;
+    margin-bottom: 2px;
+    letter-spacing: 0.02em;
+  }
+  .opt-hint {
+    font-size: 12px;
+    font-weight: 300;
+    color: #aaa;
+    letter-spacing: 0.01em;
+  }
+  .opt-check {
+    width: 16px; height: 16px;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .opt.selected .opt-check {
+    background: #1c1c1c;
+    border-color: #1c1c1c;
+  }
+  .opt-check-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #fff;
+    display: none;
+  }
+  .opt.selected .opt-check-dot { display: block; }
+
+  /* ---- NAV ---- */
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 40px;
+    gap: 12px;
+  }
+  .btn-back {
+    font-family: 'Jost', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #999;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.15s;
+  }
+  .btn-back:hover { color: #1c1c1c; }
+  .btn-back:disabled { opacity: 0.2; cursor: default; pointer-events: none; }
+
+  .btn-next {
+    font-family: 'Jost', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    background: #1c1c1c;
+    color: #fff;
+    border: 1px solid #1c1c1c;
+    padding: 14px 36px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-next:hover { background: #333; }
+  .btn-next:disabled { opacity: 0.25; cursor: default; pointer-events: none; }
+
+  /* ---- WELCOME SCREEN ---- */
+  .welcome-label {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 20px;
+  }
+  .welcome-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px;
+    font-weight: 300;
+    line-height: 1.15;
+    color: #1c1c1c;
+    margin-bottom: 16px;
+    letter-spacing: 0.01em;
+  }
+  .welcome-title em { font-style: italic; }
+  .welcome-sub {
+    font-size: 14px;
+    font-weight: 300;
+    color: #888;
+    line-height: 1.8;
+    margin-bottom: 40px;
+    max-width: 440px;
+  }
+  .divider {
+    width: 40px;
+    height: 1px;
+    background: #1c1c1c;
+    margin-bottom: 40px;
+  }
+
+  /* ---- RESULT SCREEN ---- */
+  .result-eyebrow {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 20px;
+  }
+  .result-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    font-weight: 300;
+    color: #1c1c1c;
+    margin-bottom: 8px;
+    letter-spacing: 0.01em;
+  }
+  .result-desc {
+    font-size: 13px;
+    font-weight: 300;
+    color: #888;
+    line-height: 1.8;
+    margin-bottom: 40px;
+  }
+  .result-divider {
+    width: 100%;
+    height: 1px;
+    background: #e8e8e0;
+    margin-bottom: 40px;
+  }
+
+  /* ---- PRODUCT GRID ---- */
+  .prod-section-label {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 20px;
+  }
+  .prod-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .prod-card {
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .prod-card:hover .prod-img { transform: scale(1.02); }
+  .prod-img-wrap {
+    width: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: #f5f5f0;
+    margin-bottom: 12px;
+  }
+  .prod-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+  .prod-badge {
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 5px;
+  }
+  .top-match .prod-badge { color: #1c1c1c; }
+  .prod-name {
+    font-size: 12px;
+    font-weight: 400;
+    color: #1c1c1c;
+    line-height: 1.45;
+    margin-bottom: 5px;
+    letter-spacing: 0.01em;
+  }
+  .prod-price {
+    font-size: 12px;
+    font-weight: 300;
+    color: #aaa;
+    letter-spacing: 0.02em;
+  }
+
+  /* ---- ALSO EXPLORE ---- */
+  .also-section { margin-bottom: 40px; }
+  .also-label {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 16px;
+  }
+  .also-grid { display: flex; flex-direction: column; gap: 1px; background: #e8e8e0; border: 1px solid #e8e8e0; }
+  .also-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: #fff;
+    cursor: pointer;
+    transition: background 0.15s;
+    text-decoration: none;
+    color: inherit;
+  }
+  .also-row:hover { background: #fafaf8; }
+  .also-name {
+    font-size: 13px;
+    font-weight: 400;
+    color: #1c1c1c;
+    letter-spacing: 0.02em;
+  }
+  .also-arrow {
+    font-size: 12px;
+    color: #bbb;
+  }
+
+  /* ---- RESTART ---- */
+  .restart-btn {
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #bbb;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.15s;
+  }
+  .restart-btn:hover { color: #1c1c1c; }
+
+  /* ---- VIEW ALL BTN ---- */
+  .view-all-btn {
+    display: inline-block;
+    font-family: 'Jost', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    background: #fff;
+    color: #1c1c1c;
+    border: 1px solid #1c1c1c;
+    padding: 14px 32px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    margin-bottom: 24px;
+  }
+  .view-all-btn:hover { background: #1c1c1c; color: #fff; }
+
+  .btn-row { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div class="pf-wrap">
+
+  <!-- WELCOME -->
+  <div class="screen active" id="sc-welcome">
+    <div class="welcome-label">Pillow Fights — Wall Art Finder</div>
+    <div class="welcome-title">Find the art <em>you</em><br>were meant to own.</div>
+    <div class="divider"></div>
+    <div class="welcome-sub">Answer five questions about your space, your taste, and your mood. We'll match you with paintings from our collection that feel like they were made for your walls.</div>
+    <button class="btn-next" onclick="startQuiz()">Begin &rarr;</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="sc-quiz">
+    <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="step-eyebrow" id="eyebrow">Question 1 of 5</div>
+    <div class="q-heading" id="q-heading"></div>
+    <div class="q-sub" id="q-sub"></div>
+    <div class="opts" id="opts-wrap"></div>
+    <div class="nav">
+      <button class="btn-back" id="btn-back" onclick="goBack()">&#8592; Back</button>
+      <button class="btn-next" id="btn-next" onclick="goNext()" disabled>Next &rarr;</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="screen" id="sc-result">
+    <div class="result-eyebrow">Your perfect match</div>
+    <div class="result-heading" id="res-heading"></div>
+    <div class="result-desc" id="res-desc"></div>
+    <div class="result-divider"></div>
+    <div class="prod-section-label">Recommended paintings</div>
+    <div class="prod-grid" id="prod-grid"></div>
+    <div class="btn-row">
+      <a class="view-all-btn" id="view-all-link" href="#" target="_blank">View full collection &rarr;</a>
+    </div>
+    <div class="result-divider"></div>
+    <div class="also-section">
+      <div class="also-label">You might also like</div>
+      <div class="also-grid" id="also-grid"></div>
+    </div>
+    <button class="restart-btn" onclick="resetQuiz()">Start over</button>
+  </div>
+
+</div>
+
+<script>
+const Q = [
+  {
+    id: 'room',
+    heading: 'Which room are you decorating?',
+    sub: 'This shapes the scale and energy of the art we suggest.',
+    opts: [
+      { label: 'Living room', hint: 'A statement piece the whole room anchors around', val: 'living' },
+      { label: 'Bedroom', hint: 'Something personal, calm and intimate', val: 'bedroom' },
+      { label: 'Dining area or kitchen', hint: 'Warm, inviting and full of character', val: 'dining' },
+      { label: 'Home office', hint: 'Focused, inspiring and quietly sophisticated', val: 'office' }
+    ]
+  },
+  {
+    id: 'mood',
+    heading: 'What feeling should the painting create?',
+    sub: 'Trust your first instinct here — it is usually right.',
+    opts: [
+      { label: 'Calm and serene', hint: 'Peaceful, still, meditative', val: 'calm' },
+      { label: 'Bold and dramatic', hint: 'Strong colour, high contrast, commanding presence', val: 'bold' },
+      { label: 'Warm and earthy', hint: 'Organic, grounded, natural materials', val: 'earthy' },
+      { label: 'Modern and elegant', hint: 'Clean lines, refined palette, understated luxury', val: 'modern' }
+    ]
+  },
+  {
+    id: 'palette',
+    heading: 'What colours are already in your room?',
+    sub: 'We will find art that harmonises with your existing space.',
+    opts: [
+      { label: 'Whites and neutrals', hint: 'Cream, off-white, beige, light grey', val: 'neutral' },
+      { label: 'Warm earth tones', hint: 'Terracotta, rust, ochre, warm brown', val: 'warm' },
+      { label: 'Cool and muted tones', hint: 'Sage, slate, dusty blue, teal', val: 'cool' },
+      { label: 'Dark and moody', hint: 'Charcoal, navy, deep forest, midnight', val: 'dark' }
+    ]
+  },
+  {
+    id: 'style',
+    heading: 'Which art style draws you in most?',
+    sub: 'Pick the one you return to most naturally.',
+    opts: [
+      { label: 'Pure abstract', hint: 'Shapes, colour fields and form — no literal subject', val: 'abstract' },
+      { label: 'Bohemian and eclectic', hint: 'Free-spirited, layered, warm and textured', val: 'boho' },
+      { label: 'Urban and architectural', hint: 'City grids, skylines, maps, structural forms', val: 'urban' },
+      { label: 'Nature and botanical', hint: 'Flowers, leaves, landscapes and living forms', val: 'nature' }
+    ]
+  },
+  {
+    id: 'subject',
+    heading: 'What would you love to look at every single day?',
+    sub: 'Forget trends — go with what genuinely excites you.',
+    opts: [
+      { label: 'Botanicals and flowers', hint: 'Petals, leaves, organic beauty', val: 'botanical' },
+      { label: 'Maps and cities', hint: 'Street grids, skylines, geography', val: 'maps' },
+      { label: 'Landscapes and nature', hint: 'Mountains, coasts, forests, open skies', val: 'landscape' },
+      { label: 'Food, wine and good vibes', hint: 'Kitchen art, bar prints, cafe culture', val: 'food' }
+    ]
+  }
+];
+
+const COLS = {
+  'Abstract Art': {
+    url: 'https://pillowfights.co.in/collections/abstract-art',
+    tags: ['abstract','modern','bold','neutral','dark','cool','living','office'],
+    desc: 'Bold shapes and refined colour fields that turn any wall into a conversation. Perfect for modern, minimal and high-contrast interiors.',
+    products: [
+      { name: 'Terracotta Eclipse Balance', url: 'https://pillowfights.co.in/products/terracotta-eclipse-balance-abstract-modern-art', img: 'https://pillowfights.co.in/cdn/shop/files/1_e7244afe-947a-44f1-9ca3-98015d1c1f33.jpg?v=1772781610&width=600', price: 'From ₹1,699', tags: ['warm','earthy','bold','living'] },
+      { name: 'Blush Garden Radiance', url: 'https://pillowfights.co.in/products/blush-garden-radiance-abstract-modern-art', img: 'https://pillowfights.co.in/cdn/shop/files/1copy_f684dee3-04e8-4c85-9fe5-d5a721b491a8.jpg?v=1772791636&width=600', price: 'From ₹1,699', tags: ['calm','neutral','modern','bedroom','living'] },
+      { name: 'Silent Drift Balance', url: 'https://pillowfights.co.in/products/silent-drift-balance-abstract-modern-art', img: 'https://pillowfights.co.in/cdn/shop/files/1copy_eaaa3a56-94f2-4ee1-a0ac-dc5c27b35a9c.jpg?v=1772794878&width=600', price: 'From ₹1,699', tags: ['neutral','calm','modern','office','bedroom'] }
+    ]
+  },
+  'Boho Art': {
+    url: 'https://pillowfights.co.in/collections/boho-art',
+    tags: ['boho','earthy','warm','nature','calm','bedroom','living','dining'],
+    desc: 'Free-spirited and layered, these boho prints bring warmth, texture and soulful energy to any room they inhabit.',
+    products: [
+      { name: 'Boho Wall Art — Warm Tones', url: 'https://pillowfights.co.in/collections/boho-art', img: 'https://pillowfights.co.in/cdn/shop/files/02.webp?v=1774969934&width=600', price: 'From ₹1,699', tags: ['boho','warm','earthy','bedroom','living'] },
+      { name: 'Boho Wall Art — Neutral', url: 'https://pillowfights.co.in/collections/boho-art', img: 'https://pillowfights.co.in/cdn/shop/files/01.webp?v=1774969934&width=600', price: 'From ₹1,699', tags: ['boho','calm','neutral','bedroom'] },
+      { name: 'Boho Wall Art — Earthy', url: 'https://pillowfights.co.in/collections/boho-art', img: 'https://pillowfights.co.in/cdn/shop/files/04.webp?v=1774969934&width=600', price: 'From ₹1,699', tags: ['boho','nature','earthy','living'] }
+    ]
+  },
+  'Botanical': {
+    url: 'https://pillowfights.co.in/collections/botanical',
+    tags: ['nature','earthy','calm','cool','neutral','botanical','bedroom','living','dining'],
+    desc: 'Lush, delicate and timeless. These botanical prints bring the quiet beauty of nature indoors with effortless grace.',
+    products: [
+      { name: 'Saffron Lily Bloom', url: 'https://pillowfights.co.in/products/saffron-lily-bloom-botanical-wall-art', img: 'https://pillowfights.co.in/cdn/shop/files/SaffronLilyBloom-BotanicalWallArt.jpg?v=1773215505&width=600', price: 'From ₹1,699', tags: ['botanical','warm','calm','dining','living'] },
+      { name: 'Serene Blush Amaryllis', url: 'https://pillowfights.co.in/products/serene-blush-amaryllis-botanical-wall-art', img: 'https://pillowfights.co.in/cdn/shop/files/SereneBlushAmaryllis-BotanicalWallArt_1.jpg?v=1773216605&width=600', price: 'From ₹1,699', tags: ['botanical','neutral','calm','bedroom'] },
+      { name: 'Amber Harvest Blooms', url: 'https://pillowfights.co.in/products/amber-harvest-blooms-botanical-wall-art', img: 'https://pillowfights.co.in/cdn/shop/files/AmberHarvestBlooms-BotanicalWallArt_1.jpg?v=1773222555&width=600', price: 'From ₹1,699', tags: ['botanical','warm','earthy','living','dining'] }
+    ]
+  },
+  'City Art': {
+    url: 'https://pillowfights.co.in/collections/city-art',
+    tags: ['urban','modern','bold','dark','neutral','maps','office','living'],
+    desc: 'Dramatic skylines and architectural vignettes. For walls that carry the energy, scale and pulse of the city.',
+    products: [
+      { name: 'Grand Boulevard Cityscape', url: 'https://pillowfights.co.in/collections/city-art', img: 'https://pillowfights.co.in/cdn/shop/files/GrandBoulevardCityscape-CityWallArt_1.jpg?v=1773263557&width=600', price: 'From ₹1,699', tags: ['urban','bold','dark','office','living'] },
+      { name: 'Urban Escape Collage', url: 'https://pillowfights.co.in/collections/city-art', img: 'https://pillowfights.co.in/cdn/shop/files/UrbanEscapeCollage-CityWallArt_1.jpg?v=1773262401&width=600', price: 'From ₹1,699', tags: ['urban','modern','neutral','office'] },
+      { name: 'City Art — Night Series', url: 'https://pillowfights.co.in/collections/city-art', img: 'https://pillowfights.co.in/cdn/shop/files/05.webp?v=1774969933&width=600', price: 'From ₹1,699', tags: ['urban','dark','bold','living','office'] }
+    ]
+  },
+  'Food and Bar Art': {
+    url: 'https://pillowfights.co.in/collections/food-and-bar-art',
+    tags: ['food','warm','dining','earthy','bold','neutral','living'],
+    desc: 'Art that makes the dining room feel like a place to linger. Warm, playful and full of appetite for life.',
+    products: [
+      { name: 'Food & Bar Art I', url: 'https://pillowfights.co.in/collections/food-and-bar-art', img: 'https://pillowfights.co.in/cdn/shop/files/06.webp?v=1774969935&width=600', price: 'From ₹1,699', tags: ['food','dining','warm','earthy'] },
+      { name: 'Food & Bar Art II', url: 'https://pillowfights.co.in/collections/food-and-bar-art', img: 'https://pillowfights.co.in/cdn/shop/files/04.webp?v=1774969934&width=600', price: 'From ₹1,699', tags: ['food','bold','dining','warm'] },
+      { name: 'Food & Bar Art III', url: 'https://pillowfights.co.in/collections/food-and-bar-art', img: 'https://pillowfights.co.in/cdn/shop/files/01.webp?v=1774969934&width=600', price: 'From ₹1,699', tags: ['food','neutral','dining','living'] }
+    ]
+  },
+  'Landscape Art': {
+    url: 'https://pillowfights.co.in/collections/landscape-art',
+    tags: ['nature','landscape','calm','cool','earthy','bedroom','living','office'],
+    desc: 'Sweeping vistas and quiet natural scenes. Art that gives your room depth, stillness and a view beyond the walls.',
+    products: [
+      { name: 'Landscape — Horizon Series', url: 'https://pillowfights.co.in/collections/landscape-art', img: 'https://pillowfights.co.in/cdn/shop/files/03.webp?v=1774969935&width=600', price: 'From ₹1,699', tags: ['landscape','calm','cool','bedroom','living'] },
+      { name: 'Landscape — Dusk Series', url: 'https://pillowfights.co.in/collections/landscape-art', img: 'https://pillowfights.co.in/cdn/shop/files/UrbanEscapeCollage-CityWallArt_1.jpg?v=1773262401&width=600', price: 'From ₹1,699', tags: ['landscape','earthy','nature','office'] },
+      { name: 'Landscape — Natural Light', url: 'https://pillowfights.co.in/collections/landscape-art', img: 'https://pillowfights.co.in/cdn/shop/files/06.webp?v=1774969935&width=600', price: 'From ₹1,699', tags: ['landscape','calm','neutral','bedroom'] }
+    ]
+  },
+  'Street Maps': {
+    url: 'https://pillowfights.co.in/collections/street-maps',
+    tags: ['maps','urban','modern','neutral','cool','office','living'],
+    desc: 'Beautifully detailed map prints of places that matter. Quietly personal and endlessly fascinating to look at.',
+    products: [
+      { name: 'Street Map Art I', url: 'https://pillowfights.co.in/collections/street-maps', img: 'https://pillowfights.co.in/cdn/shop/files/05.webp?v=1774969933&width=600', price: 'From ₹1,699', tags: ['maps','urban','neutral','office'] },
+      { name: 'Street Map Art II', url: 'https://pillowfights.co.in/collections/street-maps', img: 'https://pillowfights.co.in/cdn/shop/files/02.webp?v=1774969934&width=600', price: 'From ₹1,699', tags: ['maps','modern','cool','living'] },
+      { name: 'Street Map Art III', url: 'https://pillowfights.co.in/collections/street-maps', img: 'https://pillowfights.co.in/cdn/shop/files/GrandBoulevardCityscape-CityWallArt_1.jpg?v=1773263557&width=600', price: 'From ₹1,699', tags: ['maps','dark','office','bold'] }
+    ]
+  },
+  'Travel Wall Art': {
+    url: 'https://pillowfights.co.in/collections/travel-wall-art',
+    tags: ['landscape','travel','nature','cool','warm','living','bedroom','office'],
+    desc: 'For the wanderer at heart. These prints carry the spirit of far-off places into the rooms you live in every day.',
+    products: [
+      { name: 'Travel Art — Warm Destinations', url: 'https://pillowfights.co.in/collections/travel-wall-art', img: 'https://pillowfights.co.in/cdn/shop/files/06.webp?v=1774969935&width=600', price: 'From ₹1,699', tags: ['travel','warm','earthy','living'] },
+      { name: 'Travel Art — Landscapes', url: 'https://pillowfights.co.in/collections/travel-wall-art', img: 'https://pillowfights.co.in/cdn/shop/files/03.webp?v=1774969935&width=600', price: 'From ₹1,699', tags: ['travel','cool','landscape','bedroom','office'] },
+      { name: 'Travel Art — Nature Series', url: 'https://pillowfights.co.in/collections/travel-wall-art', img: 'https://pillowfights.co.in/cdn/shop/files/04.webp?v=1774969934&width=600', price: 'From ₹1,699', tags: ['travel','nature','calm','bedroom'] }
+    ]
+  }
+};
+
+let cur = 0, answers = {};
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startQuiz() { show('sc-quiz'); cur = 0; renderQ(); }
+
+function renderQ() {
+  const q = Q[cur];
+  document.getElementById('eyebrow').textContent = 'Question ' + (cur + 1) + ' of ' + Q.length;
+  document.getElementById('prog-fill').style.width = ((cur / Q.length) * 100) + '%';
+  document.getElementById('q-heading').textContent = q.heading;
+  document.getElementById('q-sub').textContent = q.sub;
+
+  const wrap = document.getElementById('opts-wrap');
+  wrap.innerHTML = '';
+  q.opts.forEach((o, i) => {
+    const d = document.createElement('div');
+    d.className = 'opt' + (answers[q.id] === o.val ? ' selected' : '');
+    d.innerHTML =
+      '<span class="opt-num">0' + (i + 1) + '</span>' +
+      '<div class="opt-body"><div class="opt-title">' + o.label + '</div><div class="opt-hint">' + o.hint + '</div></div>' +
+      '<div class="opt-check"><div class="opt-check-dot"></div></div>';
+    d.onclick = () => {
+      answers[q.id] = o.val;
+      wrap.querySelectorAll('.opt').forEach(x => x.classList.remove('selected'));
+      d.classList.add('selected');
+      document.getElementById('btn-next').disabled = false;
+    };
+    wrap.appendChild(d);
+  });
+
+  document.getElementById('btn-back').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = !answers[q.id];
+  const isLast = cur === Q.length - 1;
+  document.getElementById('btn-next').textContent = isLast ? 'See my paintings →' : 'Next →';
+}
+
+function goNext() {
+  if (!answers[Q[cur].id]) return;
+  if (cur < Q.length - 1) { cur++; renderQ(); }
+  else showResult();
+}
+
+function goBack() {
+  if (cur > 0) { cur--; renderQ(); }
+}
+
+function scoreCollections() {
+  const a = answers;
+  const signals = Object.values(a).filter(Boolean);
+  const scores = {};
+  Object.keys(COLS).forEach(k => scores[k] = 0);
+
+  Object.entries(COLS).forEach(([name, col]) => {
+    signals.forEach(sig => { if (col.tags.includes(sig)) scores[name] += 2; });
+    col.products.forEach(p => {
+      signals.forEach(sig => { if (p.tags.includes(sig)) scores[name] += 1; });
+    });
+  });
+
+  // Hard boosts based on specific answers
+  if (a.style === 'abstract')  { scores['Abstract Art'] += 5; }
+  if (a.style === 'boho')      { scores['Boho Art'] += 5; }
+  if (a.style === 'urban')     { scores['City Art'] += 4; scores['Street Maps'] += 3; }
+  if (a.style === 'nature')    { scores['Botanical'] += 3; scores['Landscape Art'] += 3; scores['Travel Wall Art'] += 1; }
+  if (a.subject === 'botanical') { scores['Botanical'] += 6; }
+  if (a.subject === 'maps')    { scores['Street Maps'] += 5; scores['City Art'] += 2; }
+  if (a.subject === 'landscape') { scores['Landscape Art'] += 5; scores['Travel Wall Art'] += 3; }
+  if (a.subject === 'food')    { scores['Food and Bar Art'] += 7; }
+  if (a.room === 'dining')     { scores['Food and Bar Art'] += 3; scores['Botanical'] += 1; }
+  if (a.room === 'office')     { scores['Street Maps'] += 2; scores['City Art'] += 2; scores['Abstract Art'] += 1; }
+  if (a.mood === 'bold')       { scores['Abstract Art'] += 2; scores['City Art'] += 2; }
+  if (a.mood === 'calm')       { scores['Botanical'] += 2; scores['Landscape Art'] += 2; }
+  if (a.mood === 'earthy')     { scores['Boho Art'] += 2; scores['Botanical'] += 1; }
+  if (a.palette === 'warm')    { scores['Boho Art'] += 2; scores['Botanical'] += 1; scores['Food and Bar Art'] += 1; }
+  if (a.palette === 'dark')    { scores['City Art'] += 2; scores['Abstract Art'] += 2; }
+  if (a.palette === 'cool')    { scores['Landscape Art'] += 1; scores['Street Maps'] += 1; }
+
+  return Object.entries(scores).sort((a, b) => b[1] - a[1]);
+}
+
+function showResult() {
+  const ranked = scoreCollections();
+  const topKey = ranked[0][0];
+  const top = COLS[topKey];
+  const alts = ranked.slice(1, 4).map(x => x[0]);
+
+  document.getElementById('res-heading').textContent = topKey;
+  document.getElementById('res-desc').textContent = top.desc;
+  document.getElementById('view-all-link').href = top.url;
+
+  const grid = document.getElementById('prod-grid');
+  grid.innerHTML = '';
+  top.products.slice(0, 3).forEach((p, i) => {
+    const a = document.createElement('a');
+    a.href = p.url;
+    a.target = '_blank';
+    a.className = 'prod-card' + (i === 0 ? ' top-match' : '');
+    a.innerHTML =
+      '<div class="prod-img-wrap"><img class="prod-img" src="' + p.img + '" alt="' + p.name + '" loading="lazy"></div>' +
+      '<div class="prod-badge">' + (i === 0 ? 'Best match' : 'Also consider') + '</div>' +
+      '<div class="prod-name">' + p.name + '</div>' +
+      '<div class="prod-price">' + p.price + '</div>';
+    grid.appendChild(a);
+  });
+
+  const ag = document.getElementById('also-grid');
+  ag.innerHTML = '';
+  alts.forEach(k => {
+    const row = document.createElement('a');
+    row.href = COLS[k].url;
+    row.target = '_blank';
+    row.className = 'also-row';
+    row.innerHTML = '<span class="also-name">' + k + '</span><span class="also-arrow">&#8594;</span>';
+    ag.appendChild(row);
+  });
+
+  show('sc-result');
+}
+
+function resetQuiz() {
+  cur = 0; answers = {};
+  show('sc-welcome');
+}
+</script>
+</body>
+</html>
